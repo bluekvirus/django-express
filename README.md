@@ -26,7 +26,7 @@ from django.conf.urls import url, include
 from express import services
 
 urlpatterns = [
-    url(r'^api/v1/', include(services.urls)) # e.g mount them on /api/v1/
+    url(r'^api/v1/', include(services.urls)) # e.g mount them on /api/v1/<app>/<fn>
 ]
 ```
 
@@ -36,11 +36,13 @@ Create apps in your Django project normally
 ./manage.py startapp app_example
 ```
 
-Then add a `services.py` file in that app folder containing all the service functions
+Then add a `services.py` file in an app folder containing all the service functions
 ```
 # proj/app_example/services.py
 
 from express.decorators import service, methods, url
+
+# /api/v1/absolute/url
 
 @url('/absolute/url')
 @methods(['GET', 'POST'])
@@ -48,17 +50,25 @@ from express.decorators import service, methods, url
 def abc(req, res, *args, **kwargs):
 	res.json({**req.GET, **req.POST})
 
+# /api/v1/app_example/efg
+
 @service
 def efg(req, res, *args, **kwargs):
 	res.html('Nothing but a test from <h2>{}</h2>'.format(__name__))
+
+# /api/v1/app_example/hij
 
 @service
 def hij(req, res, *args, **kwargs):
 	res.file('db.sqlite3')
 
+# /api/v1/app_example/x
+
 @service
 def x(req, res, *args, **kwargs):
 	res.text('Nothing but a test from {}'.format(__name__))
+
+# /api/v1/app_example/relative/url/y-service
 
 @url('relative/url/y-service')
 @service
@@ -69,6 +79,8 @@ def y(req, res, *args, **kwargs):
 	})
 	res.header('Hello~', 'World!') # header
 	res.status(201) # status
+
+# /api/v1/app_example/z
 
 @service
 def z(req, res, *args, **kwargs):
