@@ -1,5 +1,5 @@
 # django-express
-Easy Restful APIs with the Django web framework. (python3.3+)
+Easy Restful APIs with the Django web framework. (Python 3.3+, Django 1.7+)
 
 ## Install
 
