@@ -1,5 +1,6 @@
 from functools import wraps
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from express.http import ExpressRequest, ExpressResponse
 
 # last (top)
@@ -30,11 +31,13 @@ def url(path):
 	return decorator
 
 methods = require_http_methods
+csrf = csrf_protect
 # -----------------------------
 
 # first (bottom)
 def service(func):
 	'''Make sure this is the first/closest @wrapper on your service function'''
+	@csrf_exempt
 	def wrapper(req, *args, **kwargs):
 		response = ExpressResponse()
 		request = ExpressRequest(req)

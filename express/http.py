@@ -1,4 +1,5 @@
 from django.http import HttpResponse, JsonResponse, FileResponse
+from django.shortcuts import redirect
 
 class ExpressResponse(object):
 	"""docstring for ExpressResponse"""
@@ -34,6 +35,9 @@ class ExpressResponse(object):
 		'''
 		print('set proxied key:', key)
 		self._res[key] = val
+
+	def redirect(to, permanent=False, *args, **kwargs):
+		self._res = redirect(to, permanent, *args, **kwargs)
 
 	def text(self, html, *args, **kwargs):
 		'''

@@ -105,6 +105,8 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 
 ### @url
 
+### @csrf
+
 ## Licence
 Copyright 2017 Tim Lauv. 
 Under the [MIT](http://opensource.org/licenses/MIT) License.

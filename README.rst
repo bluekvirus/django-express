@@ -131,6 +131,9 @@ Decorators
 @url
 ~~~~
 
+@csrf
+~~~~~
+
 Licence
 -------
 
