@@ -14,4 +14,4 @@ python3 setup.py bdist_wheel
 
 # upload it
 #twine upload -r pypitest dist/*
-#twine upload dist/*
+twine upload dist/*
