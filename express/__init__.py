@@ -4,6 +4,9 @@ from django.conf import settings
 from django.conf.urls import url
 from django.apps import apps as django_apps
 import inspect
+import logging
+
+logger = logging.getLogger('django-express')
 
 def autodiscover(target):
 	for app in django_apps.get_app_configs():
@@ -28,8 +31,9 @@ def autodiscover(target):
 						url(r'^{}$'.format(path), fn)
 					]
 		except Exception as e:
-			print(e)
-			#pass #silently
+			logger.warning(str(e))
+			#pass
+			
 	services.global_urls = import_module(settings.ROOT_URLCONF).urlpatterns
 
 

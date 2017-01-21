@@ -1,3 +1,3 @@
 #!/bin/bash
 
-virtualenv -p python3 --always-copy .venv
+virtualenv -p python3.5 --always-copy .venv

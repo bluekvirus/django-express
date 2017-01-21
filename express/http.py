@@ -15,16 +15,13 @@ class ExpressResponse(object):
 		
 		Note: delegator, called whenever an attr/method is not found
 		'''
-		print('get proxied attr:', attr)
 		return getattr(self._res, attr)
 
 	def __setattr__(self, attr, val):
 		'''pass through attribute assignments (e.g res.status_code)'''
 		if attr in ['html', 'download', '_res']:
-			print('set attr:', attr)
 			return super().__setattr__(attr, val)
 		else:
-			print('set proxied attr:', attr)
 			return setattr(self._res, attr, val)
 
 	def __setitem__(self, key, val):
@@ -33,7 +30,6 @@ class ExpressResponse(object):
 
 		Note: special __FOO__ methods don't get through by __getattr__()
 		'''
-		print('set proxied key:', key)
 		self._res[key] = val
 
 	def redirect(to, permanent=False, *args, **kwargs):
