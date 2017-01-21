@@ -1,5 +1,8 @@
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import redirect
+import logging, json
+
+logger = logging.getLogger('django')
 
 class ExpressResponse(object):
 	"""docstring for ExpressResponse"""
@@ -59,7 +62,7 @@ class ExpressResponse(object):
 
 		@alias download
 		'''
-		self._res = self.file(srcPath, *args, **kwargs)
+		self.file(srcPath, *args, **kwargs)
 		self._res['Content-Disposition'] = 'attachment; filename={}'.format(destPath)
 
 	def status(self, code):
@@ -74,6 +77,21 @@ class ExpressRequest(object):
 	def __init__(self, req):
 		super().__init__()
 		self._req = req
+		self.params = self._req.GET # alias
+		self.form = self._req.POST # alias
+		self.files = self._req.FILES # alias
+		self.cookies = self._req.COOKIES # alias
+
+		if len(self._req.body) > 0:
+			try:
+				# Note that json de/serializer from django.core is for models.
+				# we use the native json module here.
+				self.json = json.loads(str(self._req.body, 'utf-8'))
+			except Exception as e:
+				logger.warning('[express: req.json] ' + str(e) + ': ' + str(self._req.body))
+				self.json = {}
+		else:
+			self.json = {}
 	
 	def __getattr__(self, attr):
 		'''
@@ -82,3 +100,10 @@ class ExpressRequest(object):
 		Note: delegator, called whenever an attr/method is not found
 		'''
 		return getattr(self._req, attr)
+
+	def __getitem__(self, key):
+		'''
+		pass through headers dict gets (e.g req['Header-Foo'] = 'Bar')
+
+		'''
+		return self._req.META[key]

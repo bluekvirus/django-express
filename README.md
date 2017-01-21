@@ -94,8 +94,21 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 ## APIs
 
 ### req (ExpressRequest)
+- req.params['key']
+- req.json
+- req.form
+- req.files['name']
+- req.cookies['name']
+- req['<HTTP HEADERs>']
 
 ### res (ExpressResponse)
+- res.html()/text()
+- res.json()
+- res.file()
+- res.attach()/download()
+- res.status()
+- res.header()
+- res.redirect()
 
 ## Decorators
 

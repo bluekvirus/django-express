@@ -6,7 +6,7 @@ from django.apps import apps as django_apps
 import inspect
 import logging
 
-logger = logging.getLogger('django-express')
+logger = logging.getLogger('django')
 
 def autodiscover(target):
 	for app in django_apps.get_app_configs():
@@ -19,19 +19,20 @@ def autodiscover(target):
 			for name, fn in inspect.getmembers(m, inspect.isfunction):
 				# filter out non @service 
 				if(fn.__name__.startswith('service_')):
-					# override mount point by @url('path')
-					path = fn._url if hasattr(fn, '_url') else name
-					if not path.startswith('/'):
-						# relevant path, still mount under app.name
-						path = '{}/{}'.format(app.name, path)
-					else:
-						# absolute path, mount without app.name
-						path = path[1:] # remove leading '/'
-					services.urls += [
-						url(r'^{}$'.format(path), fn)
-					]
+					# override mount point by @url('path'), can be multiple
+					path = fn._url if hasattr(fn, '_url') else [name]
+					for p in path:
+						if not p.startswith('/'):
+							# relevant path, still mount under app.name
+							p = '{}/{}'.format(app.name, p)
+						else:
+							# absolute path, mount without app.name
+							p = p[1:] # remove leading '/'
+						services.urls += [
+							url(r'^{}$'.format(p), fn)
+						]
 		except Exception as e:
-			logger.warning(str(e))
+			logger.warning('[express: autodiscover ' + app.name + '] ' + str(e))
 			#pass
 			
 	services.global_urls = import_module(settings.ROOT_URLCONF).urlpatterns

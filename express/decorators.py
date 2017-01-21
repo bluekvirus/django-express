@@ -26,7 +26,7 @@ def url(path):
 		@wraps(func)
 		def wrapper(req, *args, **kwargs):
 			return func(req, *args, **kwargs)
-		wrapper._url = path # this will be used later in autodiscover('services')
+		wrapper._url = func._url + [path] if hasattr(func, '_url') else [path] # this will be used later in autodiscover('services')
 		return wrapper
 	return decorator
 

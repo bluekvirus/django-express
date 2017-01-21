@@ -3,7 +3,10 @@ from express.decorators import inspect, service, methods, url
 
 @service
 def x(req, res, *args, **kwargs):
-	res.text('Nothing but a test from {}'.format(__name__))
+	#res.text('Nothing but a test from {}'.format(__name__))
+	res.text('<p>Agent: {}</p>'.format(req['HTTP_USER_AGENT']))
+	res.html('<p>IP: {}</p>'.format(req['REMOTE_ADDR']))
+	res.text('<p>Method: {}</p>'.format(req['REQUEST_METHOD']))
 
 @url('relative/url/y-service')
 @service

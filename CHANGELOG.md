@@ -7,12 +7,9 @@ Change Log
 2. Added basic decorators;
 3. Added request and response delegators;
 4. Added express flavored res.* apis;
+5. Added express flavored req.* apis;
 
 working on ...
 
-- req.param['?key=']
-- req.json
-- req.file['filename']
 - @permissions
-- @url multiple call stacking
 
