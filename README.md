@@ -99,7 +99,7 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 - req.form
 - req.files['name']
 - req.cookies['name']
-- req['<HTTP HEADERs>']
+- req['HTTP-HEADERs']
 
 ### res (ExpressResponse)
 - res.html()/text()

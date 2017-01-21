@@ -121,7 +121,7 @@ req (ExpressRequest)
 -  req.form
 -  req.files['name']
 -  req.cookies['name']
--  req['']
+-  req['HTTP-HEADERs']
 
 res (ExpressResponse)
 ~~~~~~~~~~~~~~~~~~~~~
