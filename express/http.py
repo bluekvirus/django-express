@@ -78,21 +78,22 @@ class ExpressRequest(object):
 		super().__init__()
 		self._req = req
 		self.params = self._req.GET # alias
-		self.form = self._req.POST # alias
+		self.form = self._req.POST # alias (when req has Content-Disposition: form-data; or application/x-www-form-urlencoded)
 		self.files = self._req.FILES # alias
 		self.cookies = self._req.COOKIES # alias
 
-		if len(self._req.body) > 0:
-			try:
+		try:
+			if len(self._req.body) > 0:
+		
 				# Note that json de/serializer from django.core is for models.
 				# we use the native json module here.
 				self.json = json.loads(str(self._req.body, 'utf-8'))
-			except Exception as e:
-				logger.warning('[express: req.json] ' + str(e) + ': ' + str(self._req.body))
+			else:
 				self.json = {}
-		else:
-			self.json = {}
-	
+		except Exception as e:
+			logger.warning('[express: req.json] ' + str(e))
+			self.json = '!!non-json request data, use req.form or req.files instead of req.json!!' # check self.form and self.files instead for req data
+
 	def __getattr__(self, attr):
 		'''
 		pass through missing attributes and methods.
@@ -107,3 +108,6 @@ class ExpressRequest(object):
 
 		'''
 		return self._req.META[key]
+
+	def header(self, key):
+		return self[key]
