@@ -1,8 +1,9 @@
 django-express
 ==============
 
-Easy Restful APIs with the Django web framework. (Python 3.3+, Django
-1.7+)
+|PyPI-v| |PyPI-pyv| |PypI-djangov|
+
+Easy Restful APIs with the Django web framework.
 
 Install
 -------
@@ -162,6 +163,10 @@ any installed app.
 
 Default mounting path: ``<root>/<app name>/<fn name>``
 
+You can change the mounting path by using the ``@url()`` decorator. You
+can also use ``django.urls.reverse()`` to get the service mount point by
+name ``<app>.<fn>``.
+
 See the **Setup** section above for mounting services root in the django
 ``urls.py``.
 
@@ -205,3 +210,10 @@ Licence
 
 Copyright 2017 Tim Lauv. Under the
 `MIT <http://opensource.org/licenses/MIT>`__ License.
+
+.. |PyPI-v| image:: https://img.shields.io/pypi/v/django-express.svg
+   :target: https://pypi.python.org/pypi/django-express
+.. |PyPI-pyv| image:: https://img.shields.io/pypi/pyversions/django-express.svg
+   :target: https://pypi.python.org/pypi/django-express
+.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.7%2C%201.8%2C%201.9%2C%201.10-44B78B.svg
+   :target: https://www.djangoproject.com/

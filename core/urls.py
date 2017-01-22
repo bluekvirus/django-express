@@ -19,6 +19,8 @@ from express import services
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/v1/', include(services.urls)) # Need to use include() here as urls.py is consulted before apps ready.
-    										 # There is no service auto-discovery before that point, thus no services.urls. 
+
+    # Need to use include() here as urls.py is consulted before apps ready.
+    # There is no service auto-discovery before that point, thus no services.urls. 
+    url(r'^api/v1/', include(services.urls, namespace='express')),
 ]

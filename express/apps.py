@@ -9,4 +9,4 @@ class ExpressConfig(AppConfig):
     def ready(self):
     	self.module.autodiscover('services') # auto load services.py from each (installed) app
     	for url in self.module.services.urls:
-    		logger.info('[express: url] ' + str(url.regex.pattern))
+    		logger.info('[express: url] ' + str(url.regex.pattern) + ' -- (name: ' + url.name + ')')

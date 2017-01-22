@@ -29,7 +29,7 @@ def autodiscover(target):
 							# absolute path, mount without app.name
 							p = p[1:] # remove leading '/'
 						services.urls += [
-							url(r'^{}$'.format(p), fn)
+							url(r'^{}$'.format(p), fn, name=app.name + '.' + name)
 						]
 		except Exception as e:
 			logger.warning('[express: autodiscover ' + app.name + '] ' + str(e))

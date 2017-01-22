@@ -1,5 +1,9 @@
-# django-express
-Easy Restful APIs with the Django web framework. (Python 3.3+, Django 1.7+)
+# django-express 
+[![PyPI-v](https://img.shields.io/pypi/v/django-express.svg)](https://pypi.python.org/pypi/django-express) 
+[![PyPI-pyv](https://img.shields.io/pypi/pyversions/django-express.svg)](https://pypi.python.org/pypi/django-express) 
+[![PypI-djangov](https://img.shields.io/badge/Django-1.7%2C%201.8%2C%201.9%2C%201.10-44B78B.svg)](https://www.djangoproject.com/)
+
+Easy Restful APIs with the Django web framework.
 
 ## Install
 
@@ -124,9 +128,11 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 ## Decorators
 
 ### @service
-Turn your `fn(req, res, *args, **kwargs)` function into a Restful service routine. Automatically detected if present in `services.py` in any installed app. 
+Turn your `fn(req, res, *args, **kwargs)` function into a Restful service routine. Automatically detected if present in `services.py` in any installed app.
 
 Default mounting path: `<root>/<app name>/<fn name>`
+
+You can change the mounting path by using the `@url()` decorator. You can also use `django.urls.reverse()` to get the service mount point by name `<app>.<fn>`.
 
 See the **Setup** section above for mounting services root in the django `urls.py`.
 
