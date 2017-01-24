@@ -5,7 +5,9 @@ Change Log
 -------------------
 working on ...
 
-- @permissions
+- @permissions (uri, model, object)
+- @test
+- api listing (view)
 
 
 0.2.4 (2017-01-22)
