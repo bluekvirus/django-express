@@ -5,7 +5,7 @@ Change Log
 -------------------
 working on ...
 
-- @permissions (uri, model, object)
+- @permissions (uri/model, object)
 - @test
 - api listing (view)
 
