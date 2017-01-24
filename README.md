@@ -35,12 +35,13 @@ urlpatterns = [
 ```
 
 ## Add RESTful services
-Create apps in your Django project normally
+Create apps in your Django project **normally**, this is to sub-divide your services by app name for better maintainability. Optional though.
 ```
 ./manage.py startapp app_example
+./manage.py startapp another_app_with_services
 ```
 
-Then add a `services.py` file in an app folder containing all the service functions with signature `fn(req, res, *args, **kwargs)` 
+Add a `services.py` file in each app folder containing the service functions `fn(req, res, *args, **kwargs)` decorated with `@service`
 ```
 # proj/app_example/services.py
 from express.decorators import service, methods, url
