@@ -1,13 +1,14 @@
 Change Log
 ==========
 
-0.3.0 (2017-01-21*)
+0.3.0 (2017-01-25*)
 -------------------
 working on ...
 
+- api listing (view, templates and static)
+- @test/case(in=, out=) (decorator, shortcut)
 - @permissions (uri/model, object)
-- @test
-- api listing (view)
+- @task (celery)
 
 
 0.2.4 (2017-01-22)

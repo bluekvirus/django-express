@@ -11,7 +11,12 @@ def abc(req, res, *args, **kwargs):
 
 @service
 def efg(req, res, *args, **kwargs):
-	res.json({'params': {**req.params}, 'form': {**req.form}, 'json': req.json, 'mime': req['CONTENT_TYPE']})
+	res.json({
+		'params': dict(req.params.lists()), # use {**req.params} in python 3.5+
+		'form': dict(req.form.lists()), # use {**req.form} in python 3.5+
+		'json': req.json, 
+		'mime': req['CONTENT_TYPE'],
+		})
 
 @service
 def hij(req, res, *args, **kwargs):

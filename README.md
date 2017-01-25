@@ -48,19 +48,26 @@ from express.decorators import service, methods, url
 
 
 # /api/v1/absolute/url
+# /api/v1/app_example/relative/abcd
 
-@url('/absolute/url')
 @methods(['GET', 'POST'])
+@url('/absolute/url')
+@url('relative/abcd')
 @service
 def abc(req, res, *args, **kwargs):
-	res.json({**req.GET, **req.POST})
+    res.json({'json': req.json, 'link:': reverse('express:testa.abc')})
 
 
 # /api/v1/app_example/efg
 
 @service
 def efg(req, res, *args, **kwargs):
-	res.html('Nothing but a test from <h2>{}</h2>'.format(__name__))
+    res.json({
+        'params': dict(req.params.lists()), # use {**req.params} in python 3.5+
+        'form': dict(req.form.lists()), # use {**req.form} in python 3.5+
+        'json': req.json, 
+        'mime': req['CONTENT_TYPE'],
+        })
 
 
 # /api/v1/app_example/hij
