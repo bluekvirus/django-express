@@ -5,6 +5,8 @@ Change Log
 -------------------
 working on ...
 
+- req.render()
+- req.header/status_code refinements
 - api listing (view, templates and static)
 - @test/case(in=, out=) (decorator, shortcut)
 - @permissions (uri/model, object)
