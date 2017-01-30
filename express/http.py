@@ -1,5 +1,5 @@
 from django.http import HttpResponse, JsonResponse, FileResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 import logging, json
 
 logger = logging.getLogger('django')
@@ -35,14 +35,18 @@ class ExpressResponse(object):
 		'''
 		self._res[key] = val
 
-	def redirect(to, permanent=False, *args, **kwargs):
+	def redirect(self, to, permanent=False, *args, **kwargs):
 		self._res = redirect(to, permanent, *args, **kwargs)
+
+	def render(self, req, template, context=None, *args, **kwargs):
+		req = getattr(req, '_req', None) or req
+		self._res = render(req, template, *args, **kwargs)
 
 	def text(self, html, *args, **kwargs):
 		'''
 		@alias html
 		'''
-		if type(self._res) is HttpResponse: # not using isinstance() type check for exact match
+		if type(self._res) is HttpResponse: # type() for exact match, instead of using isinstance() class hierarchy check.
 			self.write(html)
 		else:
 			self._res = HttpResponse(html, *args, **kwargs)

@@ -1,19 +1,17 @@
 Change Log
 ==========
 
-0.3.0 (2017-01-25*)
+0.3.0 (2017-01-29*)
 -------------------
 working on ...
 
-- req.render()
-- req.header/status_code refinements
 - api listing (view, templates and static)
-- @test/case(in=, out=) (decorator, shortcut)
-- @permissions (uri/model, object)
-- @task (celery)
+- case(in=, out=) (shortcut)
+- [optional] @permissions (uri/model, object)
+- [optional] @task (celery)
 
 
-0.2.4 (2017-01-22)
+0.2.5 (2017-01-29)
 ------------------
 1. Added services autodiscovery;
 2. Added basic decorators;
@@ -27,3 +25,5 @@ working on ...
 10. Added django.urls.reverse() support;
 11. Fixed the crlf-lf script issues on both Window and Linux/Mac;
 12. Refined code examples and comments;
+13. Fixed regression in res.redirect();
+14. Added res.render() to use django templates;

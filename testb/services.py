@@ -38,3 +38,8 @@ def y2(req, res, *args, **kwargs):
 @service
 def z(req, res, *args, **kwargs):
 	res.download('db.sqlite3')
+
+@service
+def template(req, res, *args, **kwargs):
+	res.render(req, 'test.html')
+	res.status(201)

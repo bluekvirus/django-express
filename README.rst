@@ -44,14 +44,16 @@ Mount the auto-discovered services to any entry point (url) you want in
 Add RESTful services
 --------------------
 
-Create apps in your Django project normally
+Create apps in your Django project **normally**, this is to sub-divide
+your services by app name for better maintainability. Optional though.
 
 ::
 
     ./manage.py startapp app_example
+    ./manage.py startapp another_app_with_services
 
-Then add a ``services.py`` file in an app folder containing all the
-service functions with signature ``fn(req, res, *args, **kwargs)``
+Add a ``services.py`` file in each app folder containing the service
+functions ``fn(req, res, *args, **kwargs)`` decorated with ``@service``
 
 ::
 
@@ -60,19 +62,26 @@ service functions with signature ``fn(req, res, *args, **kwargs)``
 
 
     # /api/v1/absolute/url
+    # /api/v1/app_example/relative/abcd
 
-    @url('/absolute/url')
     @methods(['GET', 'POST'])
+    @url('/absolute/url')
+    @url('relative/abcd')
     @service
     def abc(req, res, *args, **kwargs):
-        res.json({**req.GET, **req.POST})
+        res.json({'json': req.json, 'link:': reverse('express:testa.abc')})
 
 
     # /api/v1/app_example/efg
 
     @service
     def efg(req, res, *args, **kwargs):
-        res.html('Nothing but a test from <h2>{}</h2>'.format(__name__))
+        res.json({
+            'params': dict(req.params.lists()), # use {**req.params} in python 3.5+
+            'form': dict(req.form.lists()), # use {**req.form} in python 3.5+
+            'json': req.json, 
+            'mime': req['CONTENT_TYPE'],
+            })
 
 
     # /api/v1/app_example/hij
@@ -143,13 +152,20 @@ req (ExpressRequest)
 res (ExpressResponse)
 ~~~~~~~~~~~~~~~~~~~~~
 
+-  res.redirect('url')
+-  res.render(req, 'template', context={})
 -  res.html('str')/text('str')
 -  res.json(dict)
 -  res.file('path')
 -  res.attach('path')/download('path')
 -  res.status(int)
--  res.redirect('url')
--  res['HTTP-HEADER']/res.header('key', val)
+-  res['HTTP\_HEADER']/res.header('key', val)
+
+**Caveat:** ``res.status()`` and ``res['HTTP_HEADER']/res.header()``
+must be called after
+``.render()/html()/text()/json()/file()/attach()/download()`` in your
+service function for new headers and status to be applied to the
+response.
 
 Decorators
 ----------
@@ -215,5 +231,5 @@ Copyright 2017 Tim Lauv. Under the
    :target: https://pypi.python.org/pypi/django-express
 .. |PyPI-pyv| image:: https://img.shields.io/pypi/pyversions/django-express.svg
    :target: https://pypi.python.org/pypi/django-express
-.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.7%2C%201.8%2C%201.9%2C%201.10-44B78B.svg
+.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.8%2C%201.9%2C%201.10-44B78B.svg
    :target: https://www.djangoproject.com/

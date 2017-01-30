@@ -1,7 +1,7 @@
 # django-express 
 [![PyPI-v](https://img.shields.io/pypi/v/django-express.svg)](https://pypi.python.org/pypi/django-express) 
 [![PyPI-pyv](https://img.shields.io/pypi/pyversions/django-express.svg)](https://pypi.python.org/pypi/django-express) 
-[![PypI-djangov](https://img.shields.io/badge/Django-1.7%2C%201.8%2C%201.9%2C%201.10-44B78B.svg)](https://www.djangoproject.com/)
+[![PypI-djangov](https://img.shields.io/badge/Django-1.8%2C%201.9%2C%201.10-44B78B.svg)](https://www.djangoproject.com/)
 
 Easy Restful APIs with the Django web framework.
 
@@ -125,13 +125,16 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 - req['HTTP-HEADER']/req.header('key')
 
 ### res (ExpressResponse)
+- res.redirect('url')
+- res.render(req, 'template', context={})
 - res.html('str')/text('str')
 - res.json(dict)
 - res.file('path')
 - res.attach('path')/download('path')
 - res.status(int)
-- res.redirect('url')
-- res['HTTP-HEADER']/res.header('key', val)
+- res['HTTP_HEADER']/res.header('key', val)
+
+**Caveat:** `res.status()` and `res['HTTP_HEADER']/res.header()` must be called after `.render()/html()/text()/json()/file()/attach()/download()` in your service function for new headers and status to be applied to the response.
 
 ## Decorators
 
