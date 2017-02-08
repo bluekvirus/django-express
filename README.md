@@ -138,7 +138,8 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 
 ## Decorators
 
-### @service
+### For a function
+#### @service
 Turn your `fn(req, res, *args, **kwargs)` function into a Restful service routine. Automatically detected if present in `services.py` in any installed app.
 
 Default mounting path: `<root>/<app name>/<fn name>`
@@ -147,20 +148,23 @@ You can change the mounting path by using the `@url()` decorator. You can also u
 
 See the **Setup** section above for mounting services root in the django `urls.py`.
 
-### @methods(m1, m2, ...)
+#### @methods(m1, m2, ...)
 Allowed HTTP request methods to the service. You can also use `@safe` to allow only `GET` and `HEAD` requests.
 
-### @url(path)
+#### @url(path)
 Override basic service auto-path (`/<app>/<fn>`). No need to use `r'..path..'` here, what you put in `path` will be treated as raw string automatically. Feel free to put regex group captures. **Just don't mix named and annonymous capture groups in the url path, they won't work together in django.**
 
 You can use multiple `@url()` on the same service function.
 
-### @csrf
+#### @csrf
 Setting CSRF token cookie on `GET/HEAD` requests to the service. Checks and rejects `POST/PUT/PATCH/DELETE` requests according to their csrf token + cookie pairs.
 
 If you want an Ajax request to be guarded by django CSRF (django.middleware.csrf.CsrfViewMiddleware) you need to `GET/HEAD` the `@csrf` decorated service first to have your CSRF cookie (named `csrftoken`) set, then `POST/PUT/PATCH/DELETE` to it with real requests including either `X-CSRFToken` in header or `csrfmiddlewaretoken` in a hidden form `<input>` field. The header or hidden field value should match the value given by the cookie.
 
 You can change the cookie and header names but **NOT** the hidden field name in the django `settings.py`.
+
+### For a Model
+#### @serve
 
 ## Licence
 Copyright 2017 Tim Lauv. 

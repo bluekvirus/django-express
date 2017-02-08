@@ -1,10 +1,11 @@
 Change Log
 ==========
 
-0.3.0 (2017-01-29*)
+0.3.0 (2017-02-08*)
 -------------------
 working on ...
 
+- model decorator for default CRUD->api mappings
 - api listing (view, templates and static)
 - case(in=, out=) (shortcut)
 - [optional] @permissions (uri/model, object)

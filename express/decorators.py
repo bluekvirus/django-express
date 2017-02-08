@@ -1,3 +1,9 @@
+"""
+Express decorators for decorating service functions and models as RESTful apis;
+
+@author Tim Lauv
+@created 2017.01.19
+"""
 from functools import wraps
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
@@ -6,9 +12,14 @@ import logging
 
 logger = logging.getLogger('django')
 
-# last (top)
+
+# last (top) wrap
 def inspect(func):
-	'''This should be the last/outmost @wrapper on your service function'''
+	"""
+	Meta debug info of a @service decorated function.
+
+	Note that this should be the last/outmost @wrapper on your service function.service.
+	"""
 	@wraps(func) # so you can preserve func.__name__, __module__, __doc__ and __dict__ in the decorated version.
 	def wrapper(req, *args, **kwargs):
 		logger.info('Accessing service:' + str([args, kwargs, req.method, req.GET, req.POST, req.COOKIES, req.FILES, req.user]))
@@ -17,17 +28,18 @@ def inspect(func):
 		return res
 	return wrapper
 
+
 # everything in between--------
 def url(path):
 	def decorator(func):
-		'''
+		"""
 		This should be wrapping on @service wrapped functions
 
 		@url('/foo/bar') will mount service without app name in the path
 		@url('foo/bar') will mount with app name before this path
 
 		Note that @url() will replace the service function name.
-		'''
+		"""
 		@wraps(func)
 		def wrapper(req, *args, **kwargs):
 			return func(req, *args, **kwargs)
@@ -35,8 +47,11 @@ def url(path):
 		return wrapper
 	return decorator
 
+
 def csrf(func):
-	'''Ensures csrf token cookie or checkes it based on request method type.'''
+	"""
+	Ensures csrf token cookie or checkes it based on request method type.
+	"""
 	@wraps(func)
 	def wrapper(req, *args, **kwargs):
 		if req.method in ('GET', 'HEAD', 'OPTIONS', 'TRACE'):
@@ -50,13 +65,22 @@ def csrf(func):
 			# Note that we don't use requires_csrf_token() here since it was for making the 'csrf_token' tag work in django templates.
 	return wrapper
 
+
+# pass-through decorators
 methods = require_http_methods
 safe = require_safe
+
 # -----------------------------
 
-# first (bottom)
+
+# first (bottom) wrap
 def service(func):
-	'''Make sure this is the first/closest @wrapper on your service function'''
+	"""
+	Make sure this is the first/closest @wrapper on your service function
+
+	Note that this decorator tags the original function with meta and new arguments. 
+	The real url-->fn() registeration happens in __init__.py autodiscover()
+	"""
 	@csrf_exempt # setting wrapper.csrf_exempt = True, consulted by CsrfViewMiddleware
 	def wrapper(req, *args, **kwargs):
 		response = ExpressResponse()
@@ -66,3 +90,10 @@ def service(func):
 	wrapper.__name__ = 'service_{}'.format(func.__name__)
 	wrapper.__doc__ = func.__doc__
 	return wrapper
+
+
+# use only on a Django ORM Model cls
+def serve(Model):
+
+	return Model
+

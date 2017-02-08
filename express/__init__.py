@@ -1,5 +1,11 @@
+"""
+Service module functions autodiscover (loading) and registering.
+
+@author Tim Lauv
+@created 2017.01.19
+"""
 from importlib import import_module
-# from django.utils.module_loading import autodiscover_modules (BUGGY: register_to is not used atm...)
+# from django.utils.module_loading import autodiscover_modules (BUGGY: the registry `register_to` is not populated atm...)
 from django.conf import settings
 from django.conf.urls import url
 from django.apps import apps as django_apps
@@ -8,7 +14,13 @@ import logging
 
 logger = logging.getLogger('django')
 
+
 def autodiscover(target):
+	"""
+	Automatically register tagged service functions with urlconf.
+
+	Note that no matter what the target name is, that module must contain all the service functions.
+	"""
 	for app in django_apps.get_app_configs():
 		try:
 			# load the target module from that app
