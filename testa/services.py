@@ -2,7 +2,7 @@
 from express.decorators import inspect, service, methods, url, csrf, safe
 from django.urls import reverse
 
-@methods(['GET', 'POST'])
+@methods('GET', 'POST')
 @url('/absolute/url')
 @url('relative/abcd')
 @service

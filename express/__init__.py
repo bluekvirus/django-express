@@ -32,11 +32,12 @@ def autodiscover(target):
 				# filter out non @service 
 				if(fn.__name__.startswith('service_')):
 					# override mount point by @url('path'), can be multiple
-					path = fn._url if hasattr(fn, '_url') else [name]
+					path = fn._url
 					for p in path:
 						if not p.startswith('/'):
 							# relevant path, still mount under app.name
-							p = '{}/{}'.format(app.name, p)
+							if not p.startswith(app.name):
+								p = app.name + '/' + p
 						else:
 							# absolute path, mount without app.name
 							p = p[1:] # remove leading '/'

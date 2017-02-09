@@ -1,11 +1,14 @@
 Change Log
 ==========
 
-0.3.0 (2017-02-08*)
+0.3.0 (2017-02-09*)
 -------------------
+1. Changed default services mount point to `app_name/services/fn_name`;
+2. Added Model decorator @serve for default CRUD->api mappings;
+
 working on ...
 
-- model decorator for default CRUD->api mappings
+- refine @serve (+validation, +paging, +filter/sort)
 - api listing (view, templates and static)
 - case(in=, out=) (shortcut)
 - [optional] @permissions (uri/model, object)

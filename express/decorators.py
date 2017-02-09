@@ -7,7 +7,11 @@ Express decorators for decorating service functions and models as RESTful apis;
 from functools import wraps
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
+from django.shortcuts import get_object_or_404
+from django.conf.urls import url as urlconf
+from django.forms.models import model_to_dict
 from express.http import ExpressRequest, ExpressResponse
+from express import services
 import logging
 
 logger = logging.getLogger('django')
@@ -66,8 +70,11 @@ def csrf(func):
 	return wrapper
 
 
+def methods(*args):
+	return require_http_methods(args)
+
+
 # pass-through decorators
-methods = require_http_methods
 safe = require_safe
 
 # -----------------------------
@@ -79,7 +86,7 @@ def service(func):
 	Make sure this is the first/closest @wrapper on your service function
 
 	Note that this decorator tags the original function with meta and new arguments. 
-	The real url-->fn() registeration happens in __init__.py autodiscover()
+	The real url-->fn() registeration happens in __init__.py autodiscover() because of @url.
 	"""
 	@csrf_exempt # setting wrapper.csrf_exempt = True, consulted by CsrfViewMiddleware
 	def wrapper(req, *args, **kwargs):
@@ -89,11 +96,90 @@ def service(func):
 		return response._res
 	wrapper.__name__ = 'service_{}'.format(func.__name__)
 	wrapper.__doc__ = func.__doc__
+	wrapper.__module__ = func.__module__
+	wrapper._url = [func.__module__.replace('.', '/') + '/' + func.__name__]
 	return wrapper
 
 
 # use only on a Django ORM Model cls
 def serve(Model):
+	"""
+	Create default CRUD op to APIs mapping.
+
+	Note that unlike @service we do the url-->fn() reg here.
+	Warning: no validation yet...
+	Warning: no switching on the @csrf from @serve() yet...
+	Warning: no pagination yet...
+	Warning: no filter/sort support yet...
+	"""
+
+	#@csrf
+	@methods('POST')
+	@service
+	def create(req, res, *args, **kwargs):
+		m = Model(**req.json.get('payload', {})) #python3.5+ unpacking list/dict
+		#no validation yet
+		m.save()
+		res.json({'id': m.id})
+
+	@methods('GET')
+	@service
+	def read(req, res, *args, **kwargs):
+		if req.params.get('id', None):
+			m = get_object_or_404(Model, pk=req.params['id'])
+			res.json({'payload': model_to_dict(m)})
+		else:
+			res.json({'payload': list(Model.objects.values())})
+
+	#@csrf
+	@methods('PUT', 'PATCH')
+	@service
+	def update(req, res, *args, **kwargs):
+		pk = req.json.get('payload', {}).get('id', None)
+		m = get_object_or_404(Model, pk=pk)
+		for k, v in req.json['payload'].items():
+			setattr(m, k, v)
+		m.save()
+		res.json({'id': m.id})
+
+	#@csrf
+	@methods('DELETE')
+	@service
+	def delete(req, res, *args, **kwargs):
+		pk = req.params.get('id', None)
+		m = get_object_or_404(Model, pk=pk)
+		info = m.delete()
+		res.json({'id': m.id})
+
+	@methods('HEAD')
+	@service
+	def headcount(req, res, *args, **kwargs):
+		res.json({'model': Model.__module__ + '.' + Model.__name__, 'count': Model.objects.count()})
+
+
+	@service
+	def nosupport(req, res, *args, **kwargs):
+		res.json({'error': req.method + ' not supported...'})
+		res.status(501)
+
+	mapping = { 
+		'HEAD': headcount,
+		'POST': create,
+		'GET': read,
+		'PUT': update,
+		'PATCH': update,
+		'DELETE': delete 
+	}
+
+	@csrf_exempt
+	def dispatcher(req, *args, **kwargs):
+		fn = mapping.get(req.method, nosupport)
+		return fn(req, *args, **kwargs)
+
+	#register the apis
+	services.urls += [
+		urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
+	]
 
 	return Model
 

@@ -5,6 +5,7 @@
 
 Easy Restful APIs with the Django web framework.
 
+
 ## Install
 
 Download through `pip` (virtualenv -p python3.3+ .venv)
@@ -21,6 +22,7 @@ INSTALLED_APPS = [
 ]
 ```
 
+
 ## Setup
 Mount the auto-discovered services to any entry point (url) you want in `urlpatterns`
 ```
@@ -30,9 +32,10 @@ from django.conf.urls import url, include
 from express import services
 
 urlpatterns = [
-    url(r'^api/v1/', include(services.urls)) # mount them on /api/v1/<app>/<fn>
+    url(r'^api/v1/', include(services.urls)) # mount them on /api/v1/<app>/services/<fn>
 ]
 ```
+
 
 ## Add RESTful services
 Create apps in your Django project **normally**, this is to sub-divide your services by app name for better maintainability. Optional though.
@@ -50,7 +53,7 @@ from express.decorators import service, methods, url
 # /api/v1/absolute/url
 # /api/v1/app_example/relative/abcd
 
-@methods(['GET', 'POST'])
+@methods('GET', 'POST')
 @url('/absolute/url')
 @url('relative/abcd')
 @service
@@ -110,9 +113,11 @@ def z(req, res, *args, **kwargs):
 ```
 As you can see, you can still use regex captures in `@url('..path..')` if prefered. The captured group/named group will be passed normally to your service function as positional args and keyword args. However, **You can NOT use both positioned and namged group captures in the same url!! Due to django implementation.**
 
+
 ## Important Note
 Put `@service` as the inner-most decorator, other decorators don't have this hard requirement on ordering here. You can still use all 
 the decorators from the Django web framework like `@permission_required` or `@login_required` but make sure they are all above `@service`.
+
 
 ## APIs
 
@@ -136,13 +141,14 @@ the decorators from the Django web framework like `@permission_required` or `@lo
 
 **Caveat:** `res.status()` and `res['HTTP_HEADER']/res.header()` must be called after `.render()/html()/text()/json()/file()/attach()/download()` in your service function for new headers and status to be applied to the response.
 
+
 ## Decorators
 
 ### For a function
 #### @service
 Turn your `fn(req, res, *args, **kwargs)` function into a Restful service routine. Automatically detected if present in `services.py` in any installed app.
 
-Default mounting path: `<root>/<app name>/<fn name>`
+Default mounting path: `<root>/<app>/services/<fn>`
 
 You can change the mounting path by using the `@url()` decorator. You can also use `django.urls.reverse()` to get the service mount point by name `<app>.<fn>`.
 
@@ -152,7 +158,7 @@ See the **Setup** section above for mounting services root in the django `urls.p
 Allowed HTTP request methods to the service. You can also use `@safe` to allow only `GET` and `HEAD` requests.
 
 #### @url(path)
-Override basic service auto-path (`/<app>/<fn>`). No need to use `r'..path..'` here, what you put in `path` will be treated as raw string automatically. Feel free to put regex group captures. **Just don't mix named and annonymous capture groups in the url path, they won't work together in django.**
+Override basic service auto-path (`/<app>/services/<fn>`). No need to use `r'..path..'` here, what you put in `path` will be treated as raw string automatically. Feel free to put regex group captures. **Just don't mix named and annonymous capture groups in the url path, they won't work together in django.**
 
 You can use multiple `@url()` on the same service function.
 
@@ -165,6 +171,12 @@ You can change the cookie and header names but **NOT** the hidden field name in 
 
 ### For a Model
 #### @serve
+Give a Model default RESTful apis to its CRUD operations. Default path `/<app>/models/<Model>`
+* POST - create {"payload": {...data...}}
+* GET - read ?id= for single record, omit for all
+* PUT/PATCH - update {"payload": {"id": "...", ...data...}}
+* DELETE - delete ?id= for target record, required
+
 
 ## Licence
 Copyright 2017 Tim Lauv. 
