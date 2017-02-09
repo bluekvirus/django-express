@@ -148,8 +148,8 @@ def serve(Model):
 	def delete(req, res, *args, **kwargs):
 		pk = req.params.get('id', None)
 		m = get_object_or_404(Model, pk=pk)
-		info = m.delete()
-		res.json({'id': m.id})
+		noe, tinfo = m.delete()
+		res.json({'affected': tinfo})
 
 	@methods('HEAD')
 	@service
