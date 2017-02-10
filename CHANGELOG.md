@@ -8,9 +8,11 @@ Change Log
 
 working on ...
 
-- refine @serve (+validation, +paging, +filter/sort)
+- refine @serve (+csrf/[permissions] flag, +validation, +paging, +filter/sort)
+- @alias, @url support for Model
+- @schedule(period=, retry=)
 - api listing (view, templates and static)
-- case(in=, out=) (shortcut)
+- @case(in=.json, out=.json) (shortcut)
 - [optional] @permissions (uri/model, object)
 - [optional] @task (celery)
 
