@@ -5,12 +5,12 @@ Change Log
 -------------------
 1. Changed default services mount point to `<full module path>/fn_name`;
 2. Added Model decorator @serve, @serve_unprotected for default CRUD->api mappings;
+3. Added @url support for Model;
 
 working on ...
 
-- refine @serve (+validation, +paging, +filter/sort)
-- @url support for Model
 - @schedule(period=, retry=)
+- refine @serve (+validation, +paging, +filter/sort)
 - api listing (view, templates and static)
 - @case(in=.json, out=.json) (shortcut)
 - [optional] @permissions (uri/model, object)

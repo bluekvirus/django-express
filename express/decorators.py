@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.shortcuts import get_object_or_404
 from django.conf.urls import url as urlconf
+from django.db.models import Model as DjangoModel
 from django.forms.models import model_to_dict
 from express.http import ExpressRequest, ExpressResponse
 from express import services
@@ -35,9 +36,9 @@ def inspect(func):
 
 # everything in between--------
 def url(path):
-	def decorator(func):
+	def decorator(funcOrModel):
 		"""
-		This should be wrapping on @service wrapped functions
+		This should be wrapping on @service, @serve* wrapped functions/models
 
 		@url('/foo/bar') will mount service without app name in the path
 		@url('foo/bar') will mount with app name before this path
@@ -45,11 +46,17 @@ def url(path):
 		Note that @url() will replace the service default entrypoint
 		Note that @url() can be applied multiple times
 		"""
-		@wraps(func)
-		def wrapper(req, *args, **kwargs):
-			return func(req, *args, **kwargs)
-		wrapper._url = func._url + [path] if type(func._url) is list else [path] # this will be used later in autodiscover('services')
-		return wrapper
+		if type(funcOrModel) is DjangoModel:
+			tartget = funcOrModel
+		else:
+			@wraps(funcOrModel)
+			def wrapper(req, *args, **kwargs):
+				return funcOrModel(req, *args, **kwargs)
+			target = wrapper
+		
+		# this will be used later in autodiscover()
+		target._url = funcOrModel._url + [path] if type(funcOrModel._url) is list else [path]
+		return target
 	return decorator
 
 
@@ -95,7 +102,7 @@ def service(func):
 		request = ExpressRequest(req)
 		func(request, response, *args, **kwargs) # all service functions should have this signature.
 		return response._res
-	wrapper.__name__ = 'service_{}'.format(func.__name__)
+	wrapper.__name__ = func.__name__
 	wrapper.__doc__ = func.__doc__
 	wrapper.__module__ = func.__module__
 	# mount at the default entrypoint <full module path>/<func>
@@ -107,6 +114,7 @@ def service(func):
 def serve(Model):
 	"""
 	Serve a Model with default CRUD ops mapped to RESTful apis.
+	Make sure this is the first/closest @wrapper on your service function.
 
 	Note this one has csrf protection enabled.
 	"""
@@ -202,11 +210,8 @@ def _serve_model(enable_csrf=True):
 			# 	...
 			return fn(req, *args, **kwargs)
 
-		#register the apis
-		services.urls += [
-			urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
-		]
-
+		Model._express_dispatcher = dispatcher
+		Model._url = urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
 		return Model
 
 	return decorator

@@ -172,13 +172,19 @@ You can change the cookie and header names but **NOT** the hidden field name in 
 ### For a Model
 #### @serve
 Give a Model default RESTful apis to its CRUD operations. Default path `/<app>/models/<Model>`
-* POST - create {"payload": {...data...}}
-* GET - read ?id= for single record, omit for all
-* PUT/PATCH - update {"payload": {"id": "...", ...data...}}
-* DELETE - delete ?id= for target record, required
+
+* POST -- create -- {"payload": {...data...}}
+* GET -- read -- ?id= for single record, omit for all
+* PUT/PATCH -- update -- {"payload": {"id": "...", ...data...}}
+* DELETE -- delete -- ?id= for target record, required
+* HEAD -- meta -- model name and table count in reply headers
 
 #### @serve_unprotected
 Same as @serve but without csrf protection.
+
+#### @url(path)
+Same as @url for a service function.
+
 
 ## Licence
 Copyright 2017 Tim Lauv. 

@@ -1,5 +1,5 @@
 """
-Service module functions autodiscover (loading) and registering.
+Services autodiscover (loading) and registering.
 
 @author Tim Lauv
 @created 2017.01.19
@@ -15,38 +15,38 @@ import logging
 logger = logging.getLogger('django')
 
 
-def autodiscover(target):
+def autodiscover(*args):
 	"""
-	Automatically register tagged service functions with urlconf.
+	Automatically register tagged functions/models with urlconf.
 
-	Note that no matter what the target name is, that module must contain all the service functions.
 	"""
 	for app in django_apps.get_app_configs():
-		try:
-			# load the target module from that app
-			m = import_module('{}.{}'.format(app.name, target))
-			services._registry[app.name] = m
+		for target in args:
+			try:
+				# load the target module from that app
+				t = import_module('{}.{}'.format(app.name, target))
+				services._registry[app.name] = t
 
-			# inspect it for functions
-			for name, fn in inspect.getmembers(m, inspect.isfunction):
-				# filter out non @service 
-				if(fn.__name__.startswith('service_')):
-					# override mount point by @url('path'), can be multiple
-					path = fn._url if type(fn._url) is list else [fn._url]
-					for p in path:
-						if not p.startswith('/'):
-							# relevant path, still mount under app.name
-							if not p.startswith(app.name):
-								p = app.name + '/' + p
-						else:
-							# absolute path, mount without app.name
-							p = p[1:] # remove leading '/'
-						services.urls += [
-							url(r'^{}$'.format(p), fn, name=app.name + '.' + name)
-						]
-		except Exception as e:
-			logger.warning('[express: autodiscover ' + app.name + '] ' + str(e))
-			#pass
+				# inspect it for functions/classes
+				for name, m in inspect.getmembers(t, inspect.isfunction or inspect.isclass):
+					# filter out non @service, @serve* 
+					if(hasattr(m, '_url')):
+						# override mount point by @url('path'), can be multiple
+						path = m._url if type(m._url) is list else [m._url]
+						for p in path:
+							if not p.startswith('/'):
+								# relevant path, still mount under app.name
+								if not p.startswith(app.name):
+									p = app.name + '/' + p
+							else:
+								# absolute path, mount without app.name
+								p = p[1:] # remove leading '/'
+							services.urls += [
+								url(r'^{}$'.format(p), m if not hasattr(m, '_express_dispatcher') else m._express_dispatcher, name=m.__module__ + '.' + name)
+							]
+			except Exception as e:
+				logger.warning('[express: autodiscover ' + app.name + '] ' + str(e))
+				#pass
 			
 	services.global_urls = import_module(settings.ROOT_URLCONF).urlpatterns
 
