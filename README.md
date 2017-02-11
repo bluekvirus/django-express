@@ -177,6 +177,8 @@ Give a Model default RESTful apis to its CRUD operations. Default path `/<app>/m
 * PUT/PATCH - update {"payload": {"id": "...", ...data...}}
 * DELETE - delete ?id= for target record, required
 
+#### @serve_unprotected
+Same as @serve but without csrf protection.
 
 ## Licence
 Copyright 2017 Tim Lauv. 

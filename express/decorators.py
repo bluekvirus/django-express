@@ -42,12 +42,13 @@ def url(path):
 		@url('/foo/bar') will mount service without app name in the path
 		@url('foo/bar') will mount with app name before this path
 
-		Note that @url() will replace the service function name.
+		Note that @url() will replace the service default entrypoint
+		Note that @url() can be applied multiple times
 		"""
 		@wraps(func)
 		def wrapper(req, *args, **kwargs):
 			return func(req, *args, **kwargs)
-		wrapper._url = func._url + [path] if hasattr(func, '_url') else [path] # this will be used later in autodiscover('services')
+		wrapper._url = func._url + [path] if type(func._url) is list else [path] # this will be used later in autodiscover('services')
 		return wrapper
 	return decorator
 
@@ -97,89 +98,116 @@ def service(func):
 	wrapper.__name__ = 'service_{}'.format(func.__name__)
 	wrapper.__doc__ = func.__doc__
 	wrapper.__module__ = func.__module__
-	wrapper._url = [func.__module__.replace('.', '/') + '/' + func.__name__]
+	# mount at the default entrypoint <full module path>/<func>
+	wrapper._url = func.__module__.replace('.', '/') + '/' + func.__name__
 	return wrapper
 
 
 # use only on a Django ORM Model cls
 def serve(Model):
 	"""
+	Serve a Model with default CRUD ops mapped to RESTful apis.
+
+	Note this one has csrf protection enabled.
+	"""
+	return _serve_model()(Model)
+
+def serve_unprotected(Model):
+	"""
+	Same as @serve but without csrf protection.
+	"""
+	return _serve_model(enable_csrf=False)(Model)
+
+# private worker fn for @serve*
+def _serve_model(enable_csrf=True):
+	"""
+	DO NOT USE THIS ONE DIRECTLY AS MODEL CLASS DECORATOR!
+
 	Create default CRUD op to APIs mapping.
 
 	Note that unlike @service we do the url-->fn() reg here.
 	Warning: no validation yet...
-	Warning: no switching on the @csrf from @serve() yet...
 	Warning: no pagination yet...
 	Warning: no filter/sort support yet...
 	"""
+	def decorator(Model):
+		
+		@methods('POST')
+		@service
+		def create(req, res, *args, **kwargs):
+			m = Model(**req.json.get('payload', {})) #python3.5+ unpacking list/dict
+			#no validation yet
+			m.save()
+			res.json({'id': m.id})
 
-	#@csrf
-	@methods('POST')
-	@service
-	def create(req, res, *args, **kwargs):
-		m = Model(**req.json.get('payload', {})) #python3.5+ unpacking list/dict
-		#no validation yet
-		m.save()
-		res.json({'id': m.id})
+		@methods('GET')
+		@service
+		def read(req, res, *args, **kwargs):
+			if req.params.get('id', None):
+				m = get_object_or_404(Model, pk=req.params['id'])
+				res.json({'payload': model_to_dict(m)})
+			else:
+				res.json({
+					'payload': list(Model.objects.values()),
+					'count': Model.objects.count(),
+					})
 
-	@methods('GET')
-	@service
-	def read(req, res, *args, **kwargs):
-		if req.params.get('id', None):
-			m = get_object_or_404(Model, pk=req.params['id'])
-			res.json({'payload': model_to_dict(m)})
-		else:
-			res.json({'payload': list(Model.objects.values())})
+		@methods('PUT', 'PATCH')
+		@service
+		def update(req, res, *args, **kwargs):
+			pk = req.json.get('payload', {}).get('id', None)
+			m = get_object_or_404(Model, pk=pk)
+			for k, v in req.json['payload'].items():
+				setattr(m, k, v)
+			m.save()
+			res.json({'id': m.id})
 
-	#@csrf
-	@methods('PUT', 'PATCH')
-	@service
-	def update(req, res, *args, **kwargs):
-		pk = req.json.get('payload', {}).get('id', None)
-		m = get_object_or_404(Model, pk=pk)
-		for k, v in req.json['payload'].items():
-			setattr(m, k, v)
-		m.save()
-		res.json({'id': m.id})
+		@methods('DELETE')
+		@service
+		def delete(req, res, *args, **kwargs):
+			pk = req.params.get('id', None)
+			m = get_object_or_404(Model, pk=pk)
+			noe, tinfo = m.delete()
+			res.json({'affected': tinfo})
 
-	#@csrf
-	@methods('DELETE')
-	@service
-	def delete(req, res, *args, **kwargs):
-		pk = req.params.get('id', None)
-		m = get_object_or_404(Model, pk=pk)
-		noe, tinfo = m.delete()
-		res.json({'affected': tinfo})
-
-	@methods('HEAD')
-	@service
-	def headcount(req, res, *args, **kwargs):
-		res.json({'model': Model.__module__ + '.' + Model.__name__, 'count': Model.objects.count()})
+		# Warning: 'HEAD' reply body may be ignored by some browser (so use headers only)
+		@methods('HEAD')
+		@service
+		def headcount(req, res, *args, **kwargs):
+			res['X-Django-App-Model'] = Model.__module__ + '.' + Model.__name__
+			res['X-DB-Table-Count'] = Model.objects.count()
+			#res.json({'model': Model.__module__ + '.' + Model.__name__, 'count': Model.objects.count()})
 
 
-	@service
-	def nosupport(req, res, *args, **kwargs):
-		res.json({'error': req.method + ' not supported...'})
-		res.status(501)
+		@service
+		def nosupport(req, res, *args, **kwargs):
+			res.json({'error': req.method + ' not supported...'})
+			res.status(501)
 
-	mapping = { 
-		'HEAD': headcount,
-		'POST': create,
-		'GET': read,
-		'PUT': update,
-		'PATCH': update,
-		'DELETE': delete 
-	}
+		mapping = { 
+			'HEAD': headcount,
+			'POST': create,
+			'GET': read,
+			'PUT': update,
+			'PATCH': update,
+			'DELETE': delete,
+		}
 
-	@csrf_exempt
-	def dispatcher(req, *args, **kwargs):
-		fn = mapping.get(req.method, nosupport)
-		return fn(req, *args, **kwargs)
+		@csrf_exempt
+		def dispatcher(req, *args, **kwargs):
+			fn = mapping.get(req.method, nosupport)
+			if enable_csrf:
+				fn = csrf(fn)
+			#if enable_permissions:
+			# 	...
+			return fn(req, *args, **kwargs)
 
-	#register the apis
-	services.urls += [
-		urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
-	]
+		#register the apis
+		services.urls += [
+			urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
+		]
 
-	return Model
+		return Model
+
+	return decorator
 

@@ -1,15 +1,15 @@
 Change Log
 ==========
 
-0.3.0 (2017-02-09*)
+0.3.0 (2017-02-10*)
 -------------------
-1. Changed default services mount point to `app_name/services/fn_name`;
-2. Added Model decorator @serve for default CRUD->api mappings;
+1. Changed default services mount point to `<full module path>/fn_name`;
+2. Added Model decorator @serve, @serve_unprotected for default CRUD->api mappings;
 
 working on ...
 
-- refine @serve (+csrf/[permissions] flag, +validation, +paging, +filter/sort)
-- @alias, @url support for Model
+- refine @serve (+validation, +paging, +filter/sort)
+- @url support for Model
 - @schedule(period=, retry=)
 - api listing (view, templates and static)
 - @case(in=.json, out=.json) (shortcut)
