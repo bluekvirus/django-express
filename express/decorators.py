@@ -113,7 +113,7 @@ def service(func):
 def serve(Model):
 	"""
 	Serve a Model with default CRUD ops mapped to RESTful apis.
-	Make sure this is the first/closest @wrapper on your service function.
+	Make sure this is the first/closest @wrapper on your models.
 
 	Note this one has csrf protection enabled.
 	"""
