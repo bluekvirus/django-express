@@ -8,7 +8,6 @@ from functools import wraps
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.shortcuts import get_object_or_404
-from django.conf.urls import url as urlconf
 from django.db.models import Model as DjangoModel
 from django.forms.models import model_to_dict
 from express.http import ExpressRequest, ExpressResponse
@@ -211,7 +210,7 @@ def _serve_model(enable_csrf=True):
 			return fn(req, *args, **kwargs)
 
 		Model._express_dispatcher = dispatcher
-		Model._url = urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
+		Model._url = Model.__module__.replace('.', '/') + '/' + Model.__name__
 		return Model
 
 	return decorator
