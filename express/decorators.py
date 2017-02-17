@@ -151,14 +151,43 @@ def _serve_model(enable_csrf=True):
 		@methods('GET')
 		@service
 		def read(req, res, *args, **kwargs):
-			if req.params.get('id', None):
-				m = get_object_or_404(Model, pk=req.params['id'])
-				res.json({'payload': model_to_dict(m)})
+			view = int(req.params.get('view', '0')) #how many in one page, 0 is falsy
+			page = int(req.params.get('page', '0'))#show which page, 0 is falsy
+			sort = req.params.get('sort', None) #sort the objects by the given key
+			filt = req.GET.getlist('filter') #only show results contains the filter strings, ?filter=foo&filter=bar...
+			#first get payload list then sort or filter
+			if (view) and (page):
+				total = Model.objects.count()
+				if(view * (page - 1) < total ):#good
+					if(view * page < total): # not last page
+						payload = (list(Model.objects.values()))[view * (page - 1): view * page]
+						count = view
+					else: #last page
+						payload = (list(Model.objects.values()))[view * (page - 1):]
+						count = total - view * (page - 1)
+				else:#excceed the total amount of entries
+					payload = 'The asked page cannot be provided.'
 			else:
-				res.json({
-					'payload': list(Model.objects.values()),
-					'count': Model.objects.count(),
-					})
+				if req.params.get('id', None):
+					m = get_object_or_404(Model, pk=req.params['id'])
+					payload = model_to_dict(m)
+					count = 1
+				else:
+					payload = list(Model.objects.values())
+					count = Model.objects.count()
+			#check whether filt
+			
+			#check whether sort
+			if(sort):
+				def getKey(item): # function used for sorting
+					return item[sort]
+				#adjust payload
+				payload = sorted(payload, key=getKey)
+
+			res.json({
+				'payload': payload,
+				'count': count
+				})
 
 		@methods('PUT', 'PATCH')
 		@service
