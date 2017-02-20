@@ -13,7 +13,7 @@ from django.forms.models import model_to_dict
 from express.http import ExpressRequest, ExpressResponse
 from express import services
 import logging
-import ast #convert string into dictionary
+#import ast #convert string into dictionary
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging
 
 
@@ -154,29 +154,30 @@ def _serve_model(enable_csrf=True):
 		@service
 		def read(req, res, *args, **kwargs):
 			#filt and sort first, then paging			
-			#get filter parameter
-			filt = req.params.get('filter', None)
+			
+			#get filter parameter, ?filter=foo1:bar1&filter=foo2:bar2
+			filt = req.GET.getlist('filter')
+			if(filt): #make filt into an dicitionary to pass into Model.objects.filter, if exists.
+				filt = dict(e.split(':') for e in filt)
 
-			#get sort parameter
+			#get sort parameter ?sort=foo, -bar
 			sort = req.params.get('sort', None)
 			if(sort):#trim sort from string to a list for being used in order_by, if exists.
 				sort = sort.replace(', ', ',').split(',')
 
-			#get how many items on one page
-			per_page = int(req.params.get('per_page', 0))
+			#get how many items on one page ?page_size=number
+			page_size = int(req.params.get('page_size', 0))
 			
-			#get which page does user acquire
-			page = int(req.params.get('page', 0))
+			#get which page does user acquire ?start_index=number
+			start_index = int(req.params.get('start_index', -1))
 
 			#filter and sort exists at the same time
 			if(filt and sort):
-				#generate kwargs?? necessary??
-				#filt = dict(e.split('=') for e in filt.split(','))
-				#ast.literal_eval converts a string to a dictionary
-				result = Model.objects.filter(**ast.literal_eval(filt)).order_by(*sort)
+				#filt and then sort
+				result = Model.objects.filter(**filt).order_by(*sort)
 			#only filter
 			elif(filt):
-				result = Model.objects.filter(**ast.literal_eval(filt))
+				result = Model.objects.filter(**filt)
 			#only sort
 			elif(sort):
 				result = Model.objects.order_by(*sort)
@@ -184,18 +185,41 @@ def _serve_model(enable_csrf=True):
 			else:
 				result = Model.objects.all()
 
-			#paging, only paging when per_page and page both exits
-			if(per_page and page):
-				p = Paginator(result, per_page)
-				result = p.page(page).object_list
+			#paging, only paging when page_size and start_index both exits, return result
+			if(page_size and (start_index >= 0)):
+				page_error = False
+				#turn result into list, since Paginator also takes list
+				result = list(result.values())
+				#check whether start_index is within the length of the result
+				if(start_index < len(result)):
+					#orphan page
+					if(len(result) - 1 - start_index < page_size):
+						result = result[start_index:]
+					#normal page
+					else:
+						result = result[start_index:(start_index + page_size)]
+				else:
+					page_error = True
 
-			#reply result as a json
-			result = list(result.values())
-			res.json({
-				'payload': result,
-				'count': len(result)
-				})
-
+				#check whether page could be generated
+				if(page_error):
+					res.json({
+						'msg': 'Page query error.'
+						})
+				else:
+					p = Paginator(result, page_size)
+					result = p.page(1).object_list
+					res.json({
+						'payload': result,
+						'count': len(result)
+						})
+			else:
+				result = list(result.values())
+				res.json({
+					'payload': result,
+					'count': len(result)
+					})
+			
 		@methods('PUT', 'PATCH')
 		@service
 		def update(req, res, *args, **kwargs):
