@@ -28,7 +28,7 @@ def autodiscover(*args):
 				services._registry[app.name] = t
 
 				# inspect it for functions/classes
-				for name, m in inspect.getmembers(t, inspect.isfunction or inspect.isclass):
+				for name, m in inspect.getmembers(t, lambda x: inspect.isfunction(x) or inspect.isclass(x)):
 					# filter out non @service, @serve* 
 					if(hasattr(m, '_url')):
 						# override mount point by @url('path'), can be multiple

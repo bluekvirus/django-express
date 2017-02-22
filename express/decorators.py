@@ -8,12 +8,14 @@ from functools import wraps
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.shortcuts import get_object_or_404
-from django.conf.urls import url as urlconf
 from django.db.models import Model as DjangoModel
 from django.forms.models import model_to_dict
 from express.http import ExpressRequest, ExpressResponse
 from express import services
 import logging
+#import ast #convert string into dictionary
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging
+
 
 logger = logging.getLogger('django')
 
@@ -114,7 +116,7 @@ def service(func):
 def serve(Model):
 	"""
 	Serve a Model with default CRUD ops mapped to RESTful apis.
-	Make sure this is the first/closest @wrapper on your service function.
+	Make sure this is the first/closest @wrapper on your models.
 
 	Note this one has csrf protection enabled.
 	"""
@@ -151,44 +153,76 @@ def _serve_model(enable_csrf=True):
 		@methods('GET')
 		@service
 		def read(req, res, *args, **kwargs):
-			view = int(req.params.get('view', '0')) #how many in one page, 0 is falsy
-			page = int(req.params.get('page', '0'))#show which page, 0 is falsy
-			sort = req.params.get('sort', None) #sort the objects by the given key
-			filt = req.GET.getlist('filter') #only show results contains the filter strings, ?filter=foo&filter=bar...
-			#first get payload list then sort or filter
-			if (view) and (page):
-				total = Model.objects.count()
-				if(view * (page - 1) < total ):#good
-					if(view * page < total): # not last page
-						payload = (list(Model.objects.values()))[view * (page - 1): view * page]
-						count = view
-					else: #last page
-						payload = (list(Model.objects.values()))[view * (page - 1):]
-						count = total - view * (page - 1)
-				else:#excceed the total amount of entries
-					payload = 'The asked page cannot be provided.'
+			#variable indicates whether page_query in error or not
+			page_error = False
+
+			#get field, indicates shows what field after query. ?field=foo,bar
+			field = req.params.get('field', None)
+			if(field):#trim field from string to a list for being used in value_list(), if exists.
+				field = field.split(',')
+
+			#check whether single query or not
+			if req.params.get('id', None):
+				result = Model.objects.filter(**dict({'id': req.params['id']}))
+
+			#multiple query. filt and sort first, then paging
 			else:
-				if req.params.get('id', None):
-					m = get_object_or_404(Model, pk=req.params['id'])
-					payload = model_to_dict(m)
-					count = 1
+				#get filter parameter, ?filter=foo1:bar1&filter=foo2:bar2
+				filt = req.GET.getlist('filter')
+				if(filt): #make filt into an dicitionary to pass into Model.objects.filter, if exists.
+					filt = dict(e.split(':') for e in filt)
+
+				#get sort parameter ?sort=foo, -bar
+				sort = req.params.get('sort', None)
+				if(sort):#trim sort from string to a list for being used in order_by, if exists.
+					sort = sort.split(',')
+
+				#get how many items on one page ?page_size=number
+				size = int(req.params.get('size', 0))
+				
+				#get which index to start paging
+				offset = int(req.params.get('offset', 0))
+
+				#get which page does user acquire
+				page = int(req.params.get('page', 1))
+
+				#filter and sort exists at the same time
+				if(filt and sort):
+					#filt and then sort
+					result = Model.objects.filter(**filt).order_by(*sort)
+				#only filter
+				elif(filt):
+					result = Model.objects.filter(**filt)
+				#only sort
+				elif(sort):
+					result = Model.objects.order_by(*sort)
+				#no filt and sort
 				else:
-					payload = list(Model.objects.values())
-					count = Model.objects.count()
-			#check whether filt
-			
-			#check whether sort
-			if(sort):
-				def getKey(item): # function used for sorting
-					return item[sort]
-				#adjust payload
-				payload = sorted(payload, key=getKey)
+					result = Model.objects.all()
 
-			res.json({
-				'payload': payload,
-				'count': count
-				})
+				#paging, only paging when size, offset and page are all valid
+				if((size > 0) and (offset >= 0) and (page > 0)):
+					#check whether offset is within the length of the result, it has enough pages to display
+					if((offset < result.count()) and ((result.count() - offset) / size > page - 1 )):
+						#truncate result
+						result = result[offset:]
+						#generate return result
+						p = Paginator(result, size)
+						result = p.page(page).object_list
+					else:
+						page_error = True
 
+			#return result
+			if(page_error):
+				res.json({
+					'payload': '!!page query error!!'
+					})
+			else:
+				res.json({
+					'payload': list(result.values(*field if field else [])),
+					'count': result.count()
+					})
+				
 		@methods('PUT', 'PATCH')
 		@service
 		def update(req, res, *args, **kwargs):
@@ -240,7 +274,7 @@ def _serve_model(enable_csrf=True):
 			return fn(req, *args, **kwargs)
 
 		Model._express_dispatcher = dispatcher
-		Model._url = urlconf(r'^{}$'.format(Model.__module__.replace('.', '/') + '/' + Model.__name__), dispatcher, name=Model.__module__ + '.' + Model.__name__)
+		Model._url = Model.__module__.replace('.', '/') + '/' + Model.__name__
 		return Model
 
 	return decorator
