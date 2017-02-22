@@ -13,6 +13,9 @@ from django.forms.models import model_to_dict
 from express.http import ExpressRequest, ExpressResponse
 from express import services
 import logging
+#import ast #convert string into dictionary
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging
+
 
 logger = logging.getLogger('django')
 
@@ -150,15 +153,76 @@ def _serve_model(enable_csrf=True):
 		@methods('GET')
 		@service
 		def read(req, res, *args, **kwargs):
+			#variable indicates whether page_query in error or not
+			page_error = False
+
+			#get field, indicates shows what field after query. ?field=foo,bar
+			field = req.params.get('field', None)
+			if(field):#trim field from string to a list for being used in value_list(), if exists.
+				field = field.split(',')
+
+			#check whether single query or not
 			if req.params.get('id', None):
-				m = get_object_or_404(Model, pk=req.params['id'])
-				res.json({'payload': model_to_dict(m)})
+				result = Model.objects.filter(**dict({'id': req.params['id']}))
+
+			#multiple query. filt and sort first, then paging
+			else:
+				#get filter parameter, ?filter=foo1:bar1&filter=foo2:bar2
+				filt = req.GET.getlist('filter')
+				if(filt): #make filt into an dicitionary to pass into Model.objects.filter, if exists.
+					filt = dict(e.split(':') for e in filt)
+
+				#get sort parameter ?sort=foo, -bar
+				sort = req.params.get('sort', None)
+				if(sort):#trim sort from string to a list for being used in order_by, if exists.
+					sort = sort.split(',')
+
+				#get how many items on one page ?page_size=number
+				size = int(req.params.get('size', 0))
+				
+				#get which index to start paging
+				offset = int(req.params.get('offset', 0))
+
+				#get which page does user acquire
+				page = int(req.params.get('page', 1))
+
+				#filter and sort exists at the same time
+				if(filt and sort):
+					#filt and then sort
+					result = Model.objects.filter(**filt).order_by(*sort)
+				#only filter
+				elif(filt):
+					result = Model.objects.filter(**filt)
+				#only sort
+				elif(sort):
+					result = Model.objects.order_by(*sort)
+				#no filt and sort
+				else:
+					result = Model.objects.all()
+
+				#paging, only paging when size, offset and page are all valid
+				if((size > 0) and (offset >= 0) and (page > 0)):
+					#check whether offset is within the length of the result, it has enough pages to display
+					if((offset < result.count()) and ((result.count() - offset) / size > page - 1 )):
+						#truncate result
+						result = result[offset:]
+						#generate return result
+						p = Paginator(result, size)
+						result = p.page(page).object_list
+					else:
+						page_error = True
+
+			#return result
+			if(page_error):
+				res.json({
+					'payload': '!!page query error!!'
+					})
 			else:
 				res.json({
-					'payload': list(Model.objects.values()),
-					'count': Model.objects.count(),
+					'payload': list(result.values(*field if field else [])),
+					'count': result.count()
 					})
-
+				
 		@methods('PUT', 'PATCH')
 		@service
 		def update(req, res, *args, **kwargs):
