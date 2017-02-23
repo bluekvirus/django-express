@@ -10,11 +10,11 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_
 from django.shortcuts import get_object_or_404
 from django.db.models import Model as DjangoModel
 from django.forms.models import model_to_dict
+from django.core.paginator import Paginator
+from django.http import Http404
 from express.http import ExpressRequest, ExpressResponse
 from express import services
 import logging
-#import ast #convert string into dictionary
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging
 
 
 logger = logging.getLogger('django')
@@ -217,6 +217,8 @@ def _serve_model(enable_csrf=True):
 				res.json({
 					'payload': '!!page query error!!'
 					})
+			elif(not len(result) and req.params.get('id', None)):
+				raise Http404('No %s matches the given query.' % result.model._meta.object_name)
 			else:
 				res.json({
 					'payload': list(result.values(*field if field else [])),
