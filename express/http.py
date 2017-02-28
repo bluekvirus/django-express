@@ -35,10 +35,10 @@ class ExpressResponse(object):
 		'''
 		self._res[key] = val
 
-	def redirect(self, to, permanent=False, *args, **kwargs):
-		self._res = redirect(to, permanent, *args, **kwargs)
+	def redirect(self, to, *args, **kwargs):
+		self._res = redirect(to, *args, **kwargs)
 
-	def render(self, req, template, context=None, *args, **kwargs):
+	def render(self, req, template, *args, **kwargs):
 		req = getattr(req, '_req', None) or req
 		self._res = render(req, template, *args, **kwargs)
 

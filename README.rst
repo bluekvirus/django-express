@@ -38,7 +38,7 @@ Mount the auto-discovered services to any entry point (url) you want in
     from express import services
 
     urlpatterns = [
-        url(r'^api/v1/', include(services.urls)) # mount them on /api/v1/<app>/<fn>
+        url(r'^api/v1/', include(services.urls)) # mount them on /api/v1/<app>/services/<fn>
     ]
 
 Add RESTful services
@@ -64,7 +64,7 @@ functions ``fn(req, res, *args, **kwargs)`` decorated with ``@service``
     # /api/v1/absolute/url
     # /api/v1/app_example/relative/abcd
 
-    @methods(['GET', 'POST'])
+    @methods('GET', 'POST')
     @url('/absolute/url')
     @url('relative/abcd')
     @service
@@ -170,14 +170,17 @@ response.
 Decorators
 ----------
 
+For a function
+~~~~~~~~~~~~~~
+
 @service
-~~~~~~~~
+^^^^^^^^
 
 Turn your ``fn(req, res, *args, **kwargs)`` function into a Restful
 service routine. Automatically detected if present in ``services.py`` in
 any installed app.
 
-Default mounting path: ``<root>/<app name>/<fn name>``
+Default mounting path: ``<root>/<app>/services/<fn>``
 
 You can change the mounting path by using the ``@url()`` decorator. You
 can also use ``django.urls.reverse()`` to get the service mount point by
@@ -187,24 +190,24 @@ See the **Setup** section above for mounting services root in the django
 ``urls.py``.
 
 @methods(m1, m2, ...)
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 Allowed HTTP request methods to the service. You can also use ``@safe``
 to allow only ``GET`` and ``HEAD`` requests.
 
 @url(path)
-~~~~~~~~~~
+^^^^^^^^^^
 
-Override basic service auto-path (``/<app>/<fn>``). No need to use
-``r'..path..'`` here, what you put in ``path`` will be treated as raw
-string automatically. Feel free to put regex group captures. **Just
+Override basic service auto-path (``/<app>/services/<fn>``). No need to
+use ``r'..path..'`` here, what you put in ``path`` will be treated as
+raw string automatically. Feel free to put regex group captures. **Just
 don't mix named and annonymous capture groups in the url path, they
 won't work together in django.**
 
 You can use multiple ``@url()`` on the same service function.
 
 @csrf
-~~~~~
+^^^^^
 
 Setting CSRF token cookie on ``GET/HEAD`` requests to the service.
 Checks and rejects ``POST/PUT/PATCH/DELETE`` requests according to their
@@ -220,6 +223,31 @@ or hidden field value should match the value given by the cookie.
 
 You can change the cookie and header names but **NOT** the hidden field
 name in the django ``settings.py``.
+
+For a Model
+~~~~~~~~~~~
+
+@serve
+^^^^^^
+
+Give a Model default RESTful apis to its CRUD operations. Default path
+``/<app>/models/<Model>``
+
+-  POST -- create -- {"payload": {...data...}}
+-  GET -- read -- ?id= for single record, omit for all
+-  PUT/PATCH -- update -- {"payload": {"id": "...", ...data...}}
+-  DELETE -- delete -- ?id= for target record, required
+-  HEAD -- meta -- model name and table count in reply headers
+
+@serve\_unprotected
+^^^^^^^^^^^^^^^^^^^
+
+Same as @serve but without csrf protection.
+
+@url(path)
+^^^^^^^^^^
+
+Same as @url for a service function.
 
 Licence
 -------

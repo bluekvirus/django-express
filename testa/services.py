@@ -7,7 +7,7 @@ from django.urls import reverse
 @url('relative/abcd')
 @service
 def abc(req, res, *args, **kwargs):
-	res.json({'json': req.json, 'link:': reverse('express:testa.abc')})
+	res.json({'json': req.json, 'link:': reverse('express:testa.services.abc')})
 
 @service
 def efg(req, res, *args, **kwargs):

@@ -1,5 +1,6 @@
 # from django.http import HttpRequest, HttpResponse
 from express.decorators import inspect, service, methods, url, csrf, safe
+from django.urls import reverse
 
 @safe
 @service
@@ -41,5 +42,9 @@ def z(req, res, *args, **kwargs):
 
 @service
 def template(req, res, *args, **kwargs):
-	res.render(req, 'test.html')
+	res.render(req, 'test.html', {'test': 'abc'})
 	res.status(201)
+
+@service
+def goreverse(req, res, *args, **kwargs):
+	res.redirect(reverse('express:testa.services.abc'))
