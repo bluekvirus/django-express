@@ -107,8 +107,8 @@ def service(func):
 	wrapper.__name__ = func.__name__
 	wrapper.__doc__ = func.__doc__
 	wrapper.__module__ = func.__module__
-	# mount at the default entrypoint <full module path>/<func>
-	wrapper._url = func.__module__.replace('.', '/') + '/' + func.__name__
+	# base entrypoint <full module path without app name>/<func>
+	wrapper._url = '/'.join(func.__module__.split('.')[1:] + [func.__name__])
 	return wrapper
 
 
@@ -122,11 +122,13 @@ def serve(Model):
 	"""
 	return _serve_model()(Model)
 
+
 def serve_unprotected(Model):
 	"""
 	Same as @serve but without csrf protection.
 	"""
 	return _serve_model(enable_csrf=False)(Model)
+
 
 # private worker fn for @serve*
 def _serve_model(enable_csrf=True):
@@ -177,13 +179,13 @@ def _serve_model(enable_csrf=True):
 				if(sort):#trim sort from string to a list for being used in order_by, if exists.
 					sort = sort.split(',')
 
-				#get how many items on one page ?page_size=number
+				#get how many items on one page ?size=number
 				size = int(req.params.get('size', 0))
 				
-				#get which index to start paging
+				#get which index to start paging ?offset=number
 				offset = int(req.params.get('offset', 0))
 
-				#get which page does user acquire
+				#get which page does user acquire ?page=number
 				page = int(req.params.get('page', 1))
 
 				#filter and sort exists at the same time
