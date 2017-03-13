@@ -31,12 +31,11 @@ from django.conf.urls import url, include
 from express import services
 
 urlpatterns = [
-    url(r'^api/v1/', include(services.urls)) # 1. mount everything on /api/v1/<app>/services/<fn>, overriden by @url()
-
-    url(r'^app-name/api/v1/', include(services.url('app-name', ...))) # 2. mount only those from specific app(s)
+    url(r'^api/v1/', include(services.urls)) # mount everything
+    url(r'^app-name/api/v1/', include(services.url('app-name', ...))) # mount only those from specific app(s)
 ]
 ```
-Please **double check** if your `url()` call here has the path argument **ending with a trailing slash** (e.g `foo/bar/`). This is required by the Django framework. You do not need to have one in your `@url()` decorator path though.
+Please **double check** if your `url()` call here has the path argument **ending with a trailing slash** (e.g `foo/bar/`). This is required by the Django framework. You do not need to have this in your `@url()` decorator paths though.
 
 
 ## Start serving apis
@@ -156,7 +155,7 @@ The most important arguments to your service function would be the first two, na
 **Caveat:** `res.status()` and `res['HTTP_HEADER']/res.header()` must be called after `.render()/html()/text()/json()/file()/attach()/download()` in your service function for new headers and status to be applied to the response.
 
 
-### Model generates service apis
+### Model generated service apis
 Within the `models.py` file, you can decorate any of your Model class directly for it to generate the apis around its CRUD database operations.
 ```
 # proj/app_example/models.py
