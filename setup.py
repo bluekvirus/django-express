@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3.1dev2',
+    version='0.3.1dev3',
 
     description='Easy Restful APIs with the Django web framework.',
     long_description=long_description,
@@ -75,10 +75,15 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    #packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    packages=[
-        'express'
-    ],
+    packages=find_packages(exclude=[
+        'testa', 'testb', 'core', 
+        'testa.migrations', 'testb.migrations', 'express.migrations',
+        ]),
+    #packages=[
+    #    'express', # doesn't work since it only include that folder as a flat 1 lvl package
+    #    'express.db', # also note that a package here means a folder with __init__.py excluding all sub-folders.
+    #    'express.db.backends', # counts as just another package 
+    #],
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
@@ -96,10 +101,11 @@ setup(
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    #extras_require={
-    #    'dev': ['check-manifest'],
-    #    'test': ['coverage'],
-    #},
+    extras_require={
+        'pymongo': ['pymongo >= 3.4']
+        #'dev': ['check-manifest'],
+        #'test': ['coverage'],
+    },
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
