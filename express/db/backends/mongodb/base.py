@@ -22,9 +22,12 @@ DATABASES = {
 }
 
 Now you will have,
-* django.db.connections['testdb'].connection becomes available as a pymongo db;
+* django.db.connections['testdb'].db becomes available as a pymongo db;
+* django.db.connections['testdb'].collection('collection'=None) becomes available as a pymongo collection;
 * django.db.connections['testdb'].cursor('collection', **kwargs) becomes available as a .find(kwargs) pymongo cursor;
-* django.db.connections['testdb'].collection('collection') becomes available as a pymongo collection;
+After getting the above, you will have,
+* django.db.connections['testdb'].connection becomes available as pymongo client;
+
 
 Limitation
 ----------
@@ -92,8 +95,8 @@ class DatabaseWrapper(DummyBaseDatabaseWrapper):
 		return kwargs
 
 	def get_new_connection(self, conn_params):
-		"""use pymongo MongoClient to create a connection to a named db, returns pymongo db object"""
-		return MongoClient(**conn_params)[self._dbname]
+		"""use pymongo MongoClient to create a connection (a client object)"""
+		return MongoClient(**conn_params)
 
 	def init_connection_state(self):
 		"""no state to be init-ed"""
@@ -101,7 +104,7 @@ class DatabaseWrapper(DummyBaseDatabaseWrapper):
 
 	def create_cursor(self, name, **kwargs):
 		"""create a cursor on collection [name] by find(**kwargs)"""
-		return self.connection[name].find(kwargs)
+		return self.db[name].find(kwargs)
 
 	# override wrappers for PEP-249 connection methods
 
@@ -116,25 +119,33 @@ class DatabaseWrapper(DummyBaseDatabaseWrapper):
 		with self.wrap_database_errors:
 			return self.create_cursor(name, **kwargs)
 
-	def _collection(self, name):
-		"""return a collection handle by name (backend)"""
-		self.ensure_connection()
-		with self.wrap_database_errors:
-			return self.connection[name]
-
 	def _close(self):
 		"""close the db.client"""
 		if self.connection is not None:
 			with self.wrap_database_errors:
-				return self.connection.client.close()
+				return self.connection.close()
 
 	def cursor(self, name, **kwargs):
 		"""create a cursor"""
 		return self._cursor(name, **kwargs)
 
-	def collection(self, name):
+	# extras by Tim (+.collection(), +.db)
+
+	def collection(self, name=None):
 		"""return a collection handle by name"""
-		return self._collection(name)
+		self.ensure_connection()
+		with self.wrap_database_errors:
+			if name:
+				return self.db[name]
+			else:
+				return self.db.collection_names(False) #show only user created collections (no system.*)
+
+	@property
+	def db(self):
+		"""return the db handle"""
+		self.ensure_connection()
+		with self.wrap_database_errors:
+			return self.connection[self._dbname]
 
 	# override transaction methods
 
