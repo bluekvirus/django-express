@@ -83,6 +83,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
+    'mongo': {
+        'ENGINE': 'express.db.backends.mongodb',
+        'NAME': 'testdb',
     }
 }
 

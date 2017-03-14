@@ -1,17 +1,17 @@
 Change Log
 ==========
 
-0.3.1 (2017-03-11*)
+0.3.1 (2017-03-14*)
 -------------------
 1. Changed default services mount point to `<full module path>/fn_name`;
 2. Added Model decorator @serve, @serve_unprotected for default CRUD->api mappings;
 3. Added @url support for Model;
 4. Refined @serve* for Model (+paging, +filter/sort);
 5. Added services.url() in addition to services.urls for per app service registration;
+6. Added dummy mongodb (pymongo) backend for using django.db.connections['mongo'] directly;
 
 working on ...
 
-- add dummy mongodb (pymongo) backend for using django.db.connections['DB'] directly;
 - add ?db='DB' in @serve for served model db selection support;
 - refine @serve* (create/delete/update by relation-set);
 - refine @serve* (+validation)

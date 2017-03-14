@@ -38,11 +38,55 @@ Mount the auto-discovered services to any entry point (url) you want in
     from express import services
 
     urlpatterns = [
-        url(r'^api/v1/', include(services.urls)) # mount them on /api/v1/<app>/services/<fn>
+        url(r'^api/v1/', include(services.urls)) # mount everything
+        url(r'^app-name/api/v1/', include(services.url('app-name', ...))) # mount only those from specific app(s)
     ]
 
-Add RESTful services
---------------------
+Please **double check** if your ``url()`` call here has the path
+argument **ending with a trailing slash** (e.g ``foo/bar/``). This is
+required by the Django framework. You do not need to have this in your
+``@url()`` decorator paths though.
+
+Start serving apis
+------------------
+
+You can just start Django like normal, your apis will be automatically
+discovered and mounted.
+
+::
+
+    ./manage.py runserver 0.0.0.0:8000
+
+Note that for other developers to use your apis, you need to bind on
+wildcard or public WAN/LAN accessable IP address specifically after
+``runserver`` instead of leaving the param out to use the default
+``127.0.0.1`` localhost IP. If you are developing inside a VM (e.g
+through our *Vagrant* web dev vm) it is very important that you specify
+the VM's IP or the wildcard IP after ``runserver`` so that you can use
+your host machine's browser for accessing the apis through vm to host
+forwarded ports.
+
+Also, use ``runserver`` with ``DEBUG=true`` in ``settings.py`` will
+automatically serve all the ``static/`` sub-folders (and those added by
+``STATICFILES_DIRS``) from your apps. They are served like they were
+merged under the same uri set by ``STATIC_URL`` in your ``settings.py``,
+so if you do not want files from different apps to override each other,
+put all your static assets (e.g \*.js/html/css/png) in a sub-folder with
+the same name as your app inside each ``static/``. Though ``STATIC_URL``
+doesn't have a default value, after running
+``django-admin startproject`` your ``settings.py`` will set a default
+value ``/static/`` to it so you could access files from the ``static/``
+sub-folders under ``http://domain:8000/static/<file path>`` with zero
+setup time.
+
+If you are not using the ``runserver`` command for serving static assets
+and service apis during development, make sure you call
+``./manage.py collectstatics`` and serve folder ``STATIC_ROOT`` on
+``STATIC_URL``, so that ``{% load static %}`` then
+``{% static "images/hi.jpg" %}`` can work properly in your templates.
+
+Adding RESTful services
+-----------------------
 
 Create apps in your Django project **normally**, this is to sub-divide
 your services by app name for better maintainability. Optional though.
@@ -51,6 +95,9 @@ your services by app name for better maintainability. Optional though.
 
     ./manage.py startapp app_example
     ./manage.py startapp another_app_with_services
+
+Function as service api
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Add a ``services.py`` file in each app folder containing the service
 functions ``fn(req, res, *args, **kwargs)`` decorated with ``@service``
@@ -129,18 +176,22 @@ your service function as positional args and keyword args. However,
 url!! Due to django implementation.**
 
 Important Note
---------------
+^^^^^^^^^^^^^^
 
 Put ``@service`` as the inner-most decorator, other decorators don't
 have this hard requirement on ordering here. You can still use all the
 decorators from the Django web framework like ``@permission_required``
 or ``@login_required`` but make sure they are all above ``@service``.
 
-APIs
-----
+Argument APIs
+^^^^^^^^^^^^^
+
+The most important arguments to your service function would be the first
+two, namely ``req`` for request and ``res`` for response. Here are the
+available methods on these two objects.
 
 req (ExpressRequest)
-~~~~~~~~~~~~~~~~~~~~
+''''''''''''''''''''
 
 -  req.params['key']
 -  req.json
@@ -150,7 +201,7 @@ req (ExpressRequest)
 -  req['HTTP-HEADER']/req.header('key')
 
 res (ExpressResponse)
-~~~~~~~~~~~~~~~~~~~~~
+'''''''''''''''''''''
 
 -  res.redirect('url')
 -  res.render(req, 'template', context={})
@@ -167,6 +218,29 @@ must be called after
 service function for new headers and status to be applied to the
 response.
 
+Model generated service apis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Within the ``models.py`` file, you can decorate any of your Model class
+directly for it to generate the apis around its CRUD database
+operations.
+
+::
+
+    # proj/app_example/models.py
+
+    @url('/absolute/db/device')
+    @url('db/device')
+    @serve_unprotected
+    class Device(models.Model):
+        """docstring for Device"""
+        sn = models.CharField(max_length=32)
+
+This will mount 5 default service functions bound to different HTTP
+methods (POST/GET/PUT,PATCH/DELETE/HEAD) to url
+``app_example/models/Device`` for its CRUD database operations and one
+more metadata operations.
+
 Decorators
 ----------
 
@@ -178,16 +252,18 @@ For a function
 
 Turn your ``fn(req, res, *args, **kwargs)`` function into a Restful
 service routine. Automatically detected if present in ``services.py`` in
-any installed app.
+any **installed** app.
 
-Default mounting path: ``<root>/<app>/services/<fn>``
+-  Default path with ``services.urls``: ``/<app>/services/<fn>``
+-  Default path wiht ``services.url(app)``: ``/services/<fn>``
 
 You can change the mounting path by using the ``@url()`` decorator. You
-can also use ``django.urls.reverse()`` to get the service mount point by
-name ``<app>.<fn>``.
+can also use ``django.urls.reverse()`` to get the mount point by name
+``<namespace>:<app>.<fn>``.
 
-See the **Setup** section above for mounting services root in the django
-``urls.py``.
+Still, **do not forget** to mount everthing collected inside
+``services.urls`` to a root url in the django ``urls.py``. See the
+**Setup** section above.
 
 @methods(m1, m2, ...)
 ^^^^^^^^^^^^^^^^^^^^^
@@ -233,11 +309,32 @@ For a Model
 Give a Model default RESTful apis to its CRUD operations. Default path
 ``/<app>/models/<Model>``
 
+-  Default path with ``services.urls``: ``/<app>/models/<Model>``
+-  Default path wiht ``services.url(app)``: ``/models/<Model>``
+
 -  POST -- create -- {"payload": {...data...}}
 -  GET -- read -- ?id= for single record, omit for all
 -  PUT/PATCH -- update -- {"payload": {"id": "...", ...data...}}
 -  DELETE -- delete -- ?id= for target record, required
--  HEAD -- meta -- model name and table count in reply headers
+-  HEAD -- meta -- model name ``X-Django-App-Model`` and table count
+   ``X-DB-Table-Count`` in reply headers
+
+When using **GET** http request for a model, you can also specify params
+for filtering (by columns and Django ORM filter operations), sorting (by
+columns) and paging the returned result.
+
+::
+
+    ?filter=foo1:op_and_val1&filter=foo2:op_and_val2
+    ?sort=foo, -bar
+
+    ?size=number
+    ?offset=number
+    ?page=number
+
+Still, **do not forget** to mount everthing collected inside
+``services.urls`` to a root url in the django ``urls.py``. See the
+**Setup** section above.
 
 @serve\_unprotected
 ^^^^^^^^^^^^^^^^^^^
@@ -247,7 +344,7 @@ Same as @serve but without csrf protection.
 @url(path)
 ^^^^^^^^^^
 
-Same as @url for a service function.
+Same as @url for a service function but with different default paths.
 
 Licence
 -------
