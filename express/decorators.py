@@ -1,7 +1,7 @@
 """
 Express decorators for decorating service functions and models as RESTful apis;
 
-@author Tim Lauv
+@author Tim Lauv, Patrick Zhu
 @created 2017.01.19
 """
 from functools import wraps
@@ -57,7 +57,7 @@ def url(path):
 			target = wrapper
 		
 		# this will be used later in autodiscover()
-		target._url = funcOrModel._url + [path] if type(funcOrModel._url) is list else [path]
+		target._path = funcOrModel._path + [path] if type(funcOrModel._path) is list else [path]
 		return target
 	return decorator
 
@@ -107,8 +107,8 @@ def service(func):
 	wrapper.__name__ = func.__name__
 	wrapper.__doc__ = func.__doc__
 	wrapper.__module__ = func.__module__
-	# base entrypoint <full module path without app name>/<func>
-	wrapper._url = '/'.join(func.__module__.split('.')[1:] + [func.__name__])
+	# base entrypoint <full module path without app name prefix>
+	wrapper._path = '/'.join(func.__module__.split('.')[1:] + [func.__name__])
 	return wrapper
 
 
@@ -139,8 +139,6 @@ def _serve_model(enable_csrf=True):
 
 	Note that unlike @service we do the url-->fn() reg here.
 	Warning: no validation yet...
-	Warning: no pagination yet...
-	Warning: no filter/sort support yet...
 	"""
 	def decorator(Model):
 		
@@ -149,8 +147,8 @@ def _serve_model(enable_csrf=True):
 		def create(req, res, *args, **kwargs):
 			m = Model(**req.json.get('payload', {})) #python3.5+ unpacking list/dict
 			#no validation yet
-			m.save()
-			res.json({'id': m.id})
+			m.save(using=req.params.get('db', 'default'))
+			res.json({'pk': m.pk})
 
 		@methods('GET')
 		@service
@@ -164,8 +162,8 @@ def _serve_model(enable_csrf=True):
 				field = field.split(',')
 
 			#check whether single query or not
-			if req.params.get('id', None):
-				result = Model.objects.filter(**dict({'id': req.params['id']}))
+			if req.params.get('pk', None):
+				result = Model.objects.using(req.params.get('db', 'default')).filter(**dict({'pk': req.params['pk']}))
 
 			#multiple query. filt and sort first, then paging
 			else:
@@ -191,16 +189,16 @@ def _serve_model(enable_csrf=True):
 				#filter and sort exists at the same time
 				if(filt and sort):
 					#filt and then sort
-					result = Model.objects.filter(**filt).order_by(*sort)
+					result = Model.objects.using(req.params.get('db', 'default')).filter(**filt).order_by(*sort)
 				#only filter
 				elif(filt):
-					result = Model.objects.filter(**filt)
+					result = Model.objects.using(req.params.get('db', 'default')).filter(**filt)
 				#only sort
 				elif(sort):
-					result = Model.objects.order_by(*sort)
+					result = Model.objects.using(req.params.get('db', 'default')).order_by(*sort)
 				#no filt and sort
 				else:
-					result = Model.objects.all()
+					result = Model.objects.using(req.params.get('db', 'default')).all()
 
 				#paging, only paging when size, offset and page are all valid
 				if((size > 0) and (offset >= 0) and (page > 0)):
@@ -219,7 +217,7 @@ def _serve_model(enable_csrf=True):
 				res.json({
 					'payload': '!!page query error!!'
 					})
-			elif(not len(result) and req.params.get('id', None)):
+			elif(not len(result) and req.params.get('pk', None)):
 				raise Http404('No %s matches the given query.' % result.model._meta.object_name)
 			else:
 				res.json({
@@ -230,19 +228,19 @@ def _serve_model(enable_csrf=True):
 		@methods('PUT', 'PATCH')
 		@service
 		def update(req, res, *args, **kwargs):
-			pk = req.json.get('payload', {}).get('id', None)
-			m = get_object_or_404(Model, pk=pk)
+			pk = req.json.get('payload', {}).get('pk', None)
+			m = get_object_or_404(Model.objects.using(req.params.get('db', 'default')), pk=pk)
 			for k, v in req.json['payload'].items():
 				setattr(m, k, v)
-			m.save()
-			res.json({'id': m.id})
+			m.save(using=req.params.get('db', 'default')) # no need to specify using= but doing it anyway
+			res.json({'pk': m.pk})
 
 		@methods('DELETE')
 		@service
 		def delete(req, res, *args, **kwargs):
-			pk = req.params.get('id', None)
-			m = get_object_or_404(Model, pk=pk)
-			noe, tinfo = m.delete()
+			pk = req.params.get('pk', None)
+			m = get_object_or_404(Model.objects.using(req.params.get('db', 'default')), pk=pk)
+			noe, tinfo = m.delete(using=req.params.get('db', 'default')) # no need to specify using= but doing it anyway
 			res.json({'affected': tinfo})
 
 		# Warning: 'HEAD' reply body may be ignored by some browser (so use headers only)
@@ -250,7 +248,7 @@ def _serve_model(enable_csrf=True):
 		@service
 		def headcount(req, res, *args, **kwargs):
 			res['X-Django-App-Model'] = Model.__module__ + '.' + Model.__name__
-			res['X-DB-Table-Count'] = Model.objects.count()
+			res['X-DB-Table-Count'] = Model.objects.using(req.params.get('db', 'default')).count()
 			#res.json({'model': Model.__module__ + '.' + Model.__name__, 'count': Model.objects.count()})
 
 
@@ -278,7 +276,9 @@ def _serve_model(enable_csrf=True):
 			return fn(req, *args, **kwargs)
 
 		Model._express_dispatcher = dispatcher
-		Model._url = Model.__module__.replace('.', '/') + '/' + Model.__name__
+		# base entrypoint <full module path without app name prefix>
+		Model._path = '/'.join(Model.__module__.split('.')[1:] + [Model.__name__])
+
 		return Model
 
 	return decorator

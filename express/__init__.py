@@ -37,12 +37,13 @@ def autodiscover(*args):
 				# inspect it for functions/classes
 				for name, m in inspect.getmembers(t, lambda x: inspect.isfunction(x) or inspect.isclass(x)):
 					# filter out non @service, @serve* 
-					if(hasattr(m, '_url')):
+					if(hasattr(m, '_path')):
 						# override mount point by @url('path'), can be multiple
-						path = m._url if type(m._url) is list else [m._url]
-						for p in path:
+						paths = m._path if type(m._path) is list else [m._path]
+						for p in paths:
 							services._services[app.name].append({
 								# keep a service record (to generate url by calling services.urls/url() later)
+								'app': app.name,
 								'path': p,
 								'name': name,
 								'src': m,
@@ -61,33 +62,37 @@ class ServiceRegistry(object):
 	def __init__(self):
 		super().__init__()
 		self._registry = {} # should be used by autodiscover_modules() automatically but BUGGY atm, thus manually assigned.
-		self._services = {} # stores service cards collected from memeber._url
+		self._services = {} # stores service cards collected from memeber._path
 		self._generated = [] # for DEBUG=True logging
 
-	def _generateMountURLs(self, service, prefix=None):
-		# relative path
-		p = service['path']
-		if not p.startswith('/'):
-			if prefix and not p.startswith(prefix):
-				p = '/'.join([prefix, p]) # add prefix
-		# absolute path
+	def _generateMountURLs(self, service, noprefix=False):
+		if noprefix:
+			p = service['name']
 		else:
-			p = p[1:] # remove leading '/'
+			p = service['path']
+
+			# relative path
+			if not p.startswith('/'):
+				p = '/'.join([service['app'], p]) # add app name prefix in addition to 'path'
+
+			# absolute path
+			else:
+				p = p[1:] # remove leading '/'
 
 		return url(r'^{}$'.format(p), service['src'] if not hasattr(service['src'], '_express_dispatcher') else service['src']._express_dispatcher, name='.'.join([service['src'].__module__, service['name']]))
 
 	@cached_property
 	def urls(self):
 		"""return all the urls found, with app name as relative url's prefix"""
-		return self.url(*self._services.keys(), prefixedByAppName=True)
+		return self.url(*self._services.keys())
 
 	def url(self, *args, **kwargs):
-		"""return only the selected app(s)'s urls for service mounting, with no relative url app prefix by default"""
+		"""return only the selected app(s)'s urls for service mounting, use noprefix=True for exposing services directly using their names"""
 		urls = []
 		for app in args:
 			records = self._services.get(app, [])
 			for service in records:
-				urls.append(self._generateMountURLs(service, app if kwargs.get('prefixedByAppName', False) else None))
+				urls.append(self._generateMountURLs(service, kwargs.get('noprefix', False)))
 
 		self._generated += urls # remember for DEBUG=True logging [express: uri]
 		return urls

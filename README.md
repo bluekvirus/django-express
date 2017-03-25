@@ -21,7 +21,6 @@ INSTALLED_APPS = [
 ]
 ```
 
-
 ## Setup
 Mount the auto-discovered services to any entry point (url) you want in `urlpatterns`
 ```
@@ -37,7 +36,6 @@ urlpatterns = [
 ```
 Please **double check** if your `url()` call here has the path argument **ending with a trailing slash** (e.g `foo/bar/`). This is required by the Django framework. You do not need to have this in your `@url()` decorator paths though.
 
-
 ## Start serving apis
 You can just start Django like normal, your apis will be automatically discovered and mounted.
 ```
@@ -49,13 +47,13 @@ Also, use `runserver` with `DEBUG=true` in `settings.py` will automatically serv
 
 If you are not using the `runserver` command for serving static assets and service apis during development, make sure you call `./manage.py collectstatics` and serve folder `STATIC_ROOT` on `STATIC_URL`, so that `{% load static %}` then `{% static "images/hi.jpg" %}` can work properly in your templates.
 
-
 ## Adding RESTful services
 Create apps in your Django project **normally**, this is to sub-divide your services by app name for better maintainability. Optional though.
 ```
 ./manage.py startapp app_example
 ./manage.py startapp another_app_with_services
 ```
+
 
 ### Function as service api
 Add a `services.py` file in each app folder containing the service functions `fn(req, res, *args, **kwargs)` decorated with `@service`
@@ -127,12 +125,14 @@ def z(req, res, *args, **kwargs):
 ```
 As you can see, you can still use regex captures in `@url('..path..')` if prefered. The captured group/named group will be passed normally to your service function as positional args and keyword args. However, **You can NOT use both positioned and namged group captures in the same url!! Due to django implementation.**
 
+
 #### Important Note
 Put `@service` as the inner-most decorator, other decorators don't have this hard requirement on ordering here. You can still use all 
 the decorators from the Django web framework like `@permission_required` or `@login_required` but make sure they are all above `@service`.
 
 #### Argument APIs
 The most important arguments to your service function would be the first two, namely `req` for request and `res` for response. Here are the available methods on these two objects.
+
 
 ##### req (ExpressRequest)
 - req.params['key']
@@ -172,12 +172,15 @@ This will mount 5 default service functions bound to different HTTP methods (POS
 
 ## Decorators
 
+
 ### For a function
+
+
 #### @service
 Turn your `fn(req, res, *args, **kwargs)` function into a Restful service routine. Automatically detected if present in `services.py` in any **installed** app.
 
 * Default path with `services.urls`: `/<app>/services/<fn>`
-* Default path wiht `services.url(app)`: `/services/<fn>`
+* Default path with `services.url(app, noprefix=True)`: `/<fn>`
 
 You can change the mounting path by using the `@url()` decorator. You can also use `django.urls.reverse()` to get the mount point by name `<namespace>:<app>.<fn>`.
 
@@ -198,20 +201,23 @@ If you want an Ajax request to be guarded by django CSRF (django.middleware.csrf
 
 You can change the cookie and header names but **NOT** the hidden field name in the django `settings.py`.
 
+
 ### For a Model
+
+
 #### @serve
 Give a Model default RESTful apis to its CRUD operations. Default path `/<app>/models/<Model>`
 
 * Default path with `services.urls`: `/<app>/models/<Model>`
-* Default path wiht `services.url(app)`: `/models/<Model>`
+* Default path wiht `services.url(app, noprefix=True)`: `/<Model>`
 
 * POST -- create -- {"payload": {...data...}}
-* GET -- read -- ?id= for single record, omit for all
+* GET -- read -- ?pk= for single record, omit for all
 * PUT/PATCH -- update -- {"payload": {"id": "...", ...data...}}
-* DELETE -- delete -- ?id= for target record, required
+* DELETE -- delete -- ?pk= for target record, required
 * HEAD -- meta -- model name `X-Django-App-Model` and table count `X-DB-Table-Count` in reply headers
 
-When using **GET** http request for a model, you can also specify params for filtering (by columns and Django ORM filter operations), sorting (by columns) and paging the returned result.
+When using **GET** http request on a `@serve`(-ed) model, you can also specify params for filtering (by columns and Django ORM filter operations), sorting (by columns) and paging the returned result.
 ```
 ?filter=foo1:op_and_val1&filter=foo2:op_and_val2
 ?sort=foo, -bar
@@ -221,6 +227,8 @@ When using **GET** http request for a model, you can also specify params for fil
 ?page=number
 ```
 
+When using **Any** http requests on a `@serve`(-ed) model, you can always use `?db=...` to switch onto the specific database for served model apis to query and modify. The database names come from your `DATABASES` configure in `settings.py`.
+
 Still, **do not forget** to mount everthing collected inside `services.urls` to a root url in the django `urls.py`. See the **Setup** section above.
 
 #### @serve_unprotected
@@ -228,6 +236,47 @@ Same as @serve but without csrf protection.
 
 #### @url(path)
 Same as @url for a service function but with different default paths.
+
+
+## Database Backends
+
+
+### backends.mongodb
+This is a dummy backend engine to use with MongoDB connections without the involvement of Django ORM. The purpose is to have your MongoDB settings in the `settings.py` and use `django.db.connections['<your mongodb name>']` to start using MongoDB in your Django apps.
+```
+# settings.py
+
+DATABASES = {
+    ...,
+    'mongo': {
+        'ENGINE': 'express.db.backends.mongodb',
+        'HOST': 'mongo.server.com',
+        'PORT': 27017,
+        'NAME': 'testdb',
+        'USER': '...',
+        'PASSWORD': '...',
+        'OPTIONS': {
+            ...pymongo.MongoClient options...
+        }
+    },
+    ...
+}
+```
+Now you will have,
+
+* django.db.connections['testdb'].db - a `pymongo` db object;
+* django.db.connections['testdb'].collection('collection'=None) - a `pymongo` collection or all available collection names;
+* django.db.connections['testdb'].cursor('collection', **kwargs) - a .find(kwargs) `pymongo` cursor;
+
+After getting the above, you will have,
+* django.db.connections['testdb'].connection - a `pymongo` client;
+
+Use `.cursor()` for search (`GET`) apis and `.collection()` for modify (`POST/PUT/PATCH/DELETE`) apis.
+
+
+#### Limitation
+This engine works up to the point of creating the db connection and collection cursor, taking in DATABASES options from your settings.py;
+The ORM layer (migration, schema, transactions, save/delete()) will not work on database that has settings using this Engine.
 
 
 ## Licence

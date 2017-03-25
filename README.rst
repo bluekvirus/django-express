@@ -255,7 +255,7 @@ service routine. Automatically detected if present in ``services.py`` in
 any **installed** app.
 
 -  Default path with ``services.urls``: ``/<app>/services/<fn>``
--  Default path wiht ``services.url(app)``: ``/services/<fn>``
+-  Default path with ``services.url(app, noprefix=True)``: ``/<fn>``
 
 You can change the mounting path by using the ``@url()`` decorator. You
 can also use ``django.urls.reverse()`` to get the mount point by name
@@ -310,18 +310,18 @@ Give a Model default RESTful apis to its CRUD operations. Default path
 ``/<app>/models/<Model>``
 
 -  Default path with ``services.urls``: ``/<app>/models/<Model>``
--  Default path wiht ``services.url(app)``: ``/models/<Model>``
+-  Default path wiht ``services.url(app, noprefix=True)``: ``/<Model>``
 
 -  POST -- create -- {"payload": {...data...}}
--  GET -- read -- ?id= for single record, omit for all
+-  GET -- read -- ?pk= for single record, omit for all
 -  PUT/PATCH -- update -- {"payload": {"id": "...", ...data...}}
--  DELETE -- delete -- ?id= for target record, required
+-  DELETE -- delete -- ?pk= for target record, required
 -  HEAD -- meta -- model name ``X-Django-App-Model`` and table count
    ``X-DB-Table-Count`` in reply headers
 
-When using **GET** http request for a model, you can also specify params
-for filtering (by columns and Django ORM filter operations), sorting (by
-columns) and paging the returned result.
+When using **GET** http request on a ``@serve``\ (-ed) model, you can
+also specify params for filtering (by columns and Django ORM filter
+operations), sorting (by columns) and paging the returned result.
 
 ::
 
@@ -331,6 +331,11 @@ columns) and paging the returned result.
     ?size=number
     ?offset=number
     ?page=number
+
+When using **Any** http requests on a ``@serve``\ (-ed) model, you can
+always use ``?db=...`` to switch onto the specific database for served
+model apis to query and modify. The database names come from your
+``DATABASES`` configure in ``settings.py``.
 
 Still, **do not forget** to mount everthing collected inside
 ``services.urls`` to a root url in the django ``urls.py``. See the
@@ -345,6 +350,60 @@ Same as @serve but without csrf protection.
 ^^^^^^^^^^
 
 Same as @url for a service function but with different default paths.
+
+Database Backends
+-----------------
+
+backends.mongodb
+~~~~~~~~~~~~~~~~
+
+This is a dummy backend engine to use with MongoDB connections without
+the involvement of Django ORM. The purpose is to have your MongoDB
+settings in the ``settings.py`` and use
+``django.db.connections['<your mongodb name>']`` to start using MongoDB
+in your Django apps.
+
+::
+
+    # settings.py
+
+    DATABASES = {
+        ...,
+        'mongo': {
+            'ENGINE': 'express.db.backends.mongodb',
+            'HOST': 'mongo.server.com',
+            'PORT': 27017,
+            'NAME': 'testdb',
+            'USER': '...',
+            'PASSWORD': '...',
+            'OPTIONS': {
+                ...pymongo.MongoClient options...
+            }
+        },
+        ...
+    }
+
+Now you will have,
+
+-  django.db.connections['testdb'].db - a ``pymongo`` db object;
+-  django.db.connections['testdb'].collection('collection'=None) - a
+   ``pymongo`` collection or all available collection names;
+-  django.db.connections['testdb'].cursor('collection', \*\*kwargs) - a
+   .find(kwargs) ``pymongo`` cursor;
+
+After getting the above, you will have, \*
+django.db.connections['testdb'].connection - a ``pymongo`` client;
+
+Use ``.cursor()`` for search (``GET``) apis and ``.collection()`` for
+modify (``POST/PUT/PATCH/DELETE``) apis.
+
+Limitation
+^^^^^^^^^^
+
+This engine works up to the point of creating the db connection and
+collection cursor, taking in DATABASES options from your settings.py;
+The ORM layer (migration, schema, transactions, save/delete()) will not
+work on database that has settings using this Engine.
 
 Licence
 -------
