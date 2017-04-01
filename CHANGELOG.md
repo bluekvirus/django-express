@@ -13,6 +13,7 @@ Change Log
 
 working on ...
 
+- @cors('domain', ...)
 - refine @serve* (create/delete/update by relation-set);
 - refine @serve* (+validation)
 - api listing (view, templates and static)

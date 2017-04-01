@@ -66,18 +66,16 @@ class ServiceRegistry(object):
 		self._generated = [] # for DEBUG=True logging
 
 	def _generateMountURLs(self, service, noprefix=False):
-		if noprefix:
-			p = service['name']
-		else:
-			p = service['path']
+		p = service['path']
 
-			# relative path
-			if not p.startswith('/'):
+		# relative path
+		if not p.startswith('/'):
+			if not noprefix:
 				p = '/'.join([service['app'], p]) # add app name prefix in addition to 'path'
 
-			# absolute path
-			else:
-				p = p[1:] # remove leading '/'
+		# absolute path
+		else:
+			p = p[1:] # remove leading '/'
 
 		return url(r'^{}$'.format(p), service['src'] if not hasattr(service['src'], '_express_dispatcher') else service['src']._express_dispatcher, name='.'.join([service['src'].__module__, service['name']]))
 

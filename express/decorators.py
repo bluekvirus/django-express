@@ -42,10 +42,10 @@ def url(path):
 		"""
 		This should be wrapping on @service, @serve* wrapped functions/models
 
-		@url('/foo/bar') will mount service without app name in the path
-		@url('foo/bar') will mount with app name before this path
+		@url('/foo/bar') will mount service without app name auto-prefixed in the path
+		@url('foo/bar') will mount with app name auto-prefixed before this uri
 
-		Note that @url() will replace the service default entrypoint
+		Note that @url() will replace the service default entrypoint (without @url: func/Model name)
 		Note that @url() can be applied multiple times
 		"""
 		if type(funcOrModel) is DjangoModel:
@@ -57,7 +57,7 @@ def url(path):
 			target = wrapper
 		
 		# this will be used later in autodiscover()
-		target._path = funcOrModel._path + [path] if type(funcOrModel._path) is list else [path]
+		target._path = funcOrModel._path + [path] if type(funcOrModel._path) is list else [path] # else override default entrypoint
 		return target
 	return decorator
 
@@ -84,6 +84,10 @@ def methods(*args):
 	return require_http_methods(args)
 
 
+def cors(*args):
+	pass #TBI
+
+
 # pass-through decorators
 safe = require_safe
 
@@ -107,8 +111,8 @@ def service(func):
 	wrapper.__name__ = func.__name__
 	wrapper.__doc__ = func.__doc__
 	wrapper.__module__ = func.__module__
-	# base entrypoint <full module path without app name prefix>
-	wrapper._path = '/'.join(func.__module__.split('.')[1:] + [func.__name__])
+	# base entrypoint
+	wrapper._path = func.__name__
 	return wrapper
 
 
@@ -276,8 +280,8 @@ def _serve_model(enable_csrf=True):
 			return fn(req, *args, **kwargs)
 
 		Model._express_dispatcher = dispatcher
-		# base entrypoint <full module path without app name prefix>
-		Model._path = '/'.join(Model.__module__.split('.')[1:] + [Model.__name__])
+		# base entrypoint
+		Model._path = Model.__name__
 
 		return Model
 
