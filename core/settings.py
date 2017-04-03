@@ -79,6 +79,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+# from django.db import connections --> connections['default']
 
 DATABASES = {
     'default': {
@@ -88,6 +89,25 @@ DATABASES = {
     'mongo': {
         'ENGINE': 'express.db.backends.mongodb',
         'NAME': 'testdb',
+    }
+}
+
+
+# Channel Layers
+# https://channels.readthedocs.io/en/stable/backends.html
+# from channels import channel_layers --> channel_layers['default']
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'asgiref.inmemory.ChannelLayer',
+        'ROUTING': 'core.routings.channel_routing',
+    },
+    'redis': {
+        'BACKEND': 'asgi_redis.RedisChannelLayer',
+        'ROUTING': 'core.routings.channel_routing',
+        'CONFIG': {
+            # 'hosts': [('localhost', 6379)]
+        }
     }
 }
 
