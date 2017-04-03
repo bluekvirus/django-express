@@ -1,26 +1,27 @@
 Change Log
 ==========
 
-0.3.2 (2017-03-24*)
+0.3.2+ (2017-03-24*)
 -------------------
-1. Changed default services mount point to `<full module path>/fn_name`;
+1. Changed default services mount point to `<app_name>/<fn_name>`;
 2. Added Model decorator @serve, @serve_unprotected for default CRUD->api mappings;
 3. Added @url support for Model;
 4. Refined @serve* for Model (+paging, +filter/sort);
 5. Added services.url(noprefix=False) in addition to services.urls for per app service registration;
 6. Added dummy mongodb (pymongo) backend for using django.db.connections['mongo'] directly;
 7. Added ?db='DB' in @serve(-ed apis) for multiple db selection support;
+8. Changed relative @url services mount point to `<app_name>/<url>`; 
 
 working on ...
 
-- @cors('domain', ...)
-- refine @serve* (create/delete/update by relation-set);
-- refine @serve* (+validation)
-- api listing (view, templates and static)
-- @case(in=.json, out=.json) (shortcut)
-- [optional] @schedule(period=, retry=)
-- [optional] @permissions (uri/model, object)
-- [optional] @task (celery)
+- @cors and CORS middleware;
+- @permissions (uri/model, object) and ModelObjectBackend auth backend, (link m-m [ObjectPermission, object.pk] to user/group as object_permissions);
+- refine @serve* (read/create/delete/update by relation-set: /obj/id/related-obj/...);
+- refine @serve* (+validation);
+- api listing (view, templates and static);
+- @case(in=.json, out=.json) (shortcut);
+- [optional] @task (celery);
+- [optional] @schedule(period=, retry=), this indicates it is a @task;
 
 
 0.2.5 (2017-01-29)

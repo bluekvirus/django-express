@@ -34,6 +34,8 @@ def autodiscover(*args):
 				t = import_module('{}.{}'.format(app.name, target))
 				services._registry[app.name][target] = t # keep a module record, but not really used atm.
 
+				# note that, if t is a package, only those exposed by its __init__.py are considered.
+
 				# inspect it for functions/classes
 				for name, m in inspect.getmembers(t, lambda x: inspect.isfunction(x) or inspect.isclass(x)):
 					# filter out non @service, @serve* 
