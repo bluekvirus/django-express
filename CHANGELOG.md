@@ -14,13 +14,15 @@ Change Log
 
 working on ...
 
-- @cors and CORS middleware;
+- @methods to replace the need to use generic views in Django;
+- @cors and CORS middleware (mode: all/regex, tagged-only);
+- @Model.signals.event for faster signal hook-up with fn;
 - @permissions (uri/model, object) and ModelObjectBackend auth backend, (link m-m [ObjectPermission, object.pk] to user/group as object_permissions);
 - refine @serve* (read/create/delete/update by relation-set: /obj/id/related-obj/...);
 - refine @serve* (+validation);
 - api listing (view, templates and static);
 - @case(in=.json, out=.json) (shortcut);
-- [optional] @task (celery);
+- [optional] @task (asgi channel_layer/workers), live result notify;
 - [optional] @schedule(period=, retry=), this indicates it is a @task;
 
 
