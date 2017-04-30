@@ -7,7 +7,7 @@ Easy Restful APIs with the Django web framework.
 
 
 ## Install
-Download through `pip` (virtualenv -p python3.3+ .venv)
+Download through `pip` (virtualenv -p python3 .venv)
 ```
 pip install django-express
 ```
