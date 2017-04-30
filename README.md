@@ -187,7 +187,7 @@ You can change the mounting path by using the `@url()` decorator. You can also u
 Still, **do not forget** to mount everthing collected inside `services.urls` to a root url in the django `urls.py`. See the **Setup** section above.
 
 #### @methods(m1, m2, ...)
-Allowed HTTP request methods to the service. You can also use `@safe` to allow only `GET` and `HEAD` requests.
+Allowed HTTP request methods to the service. You can also use `@safe` to allow only `GET` and `HEAD` requests. You can use different `@methods()` on each service function with the same `@url()` path to reuse the same url.
 
 #### @url(path)
 Override basic service auto-path (`/<app>/<fn>`). No need to use `r'..path..'` here, what you put in `path` will be treated as raw string automatically. Feel free to put regex group captures. **Just don't mix named and annonymous capture groups in the url path, they won't work together in django.**
@@ -236,8 +236,11 @@ Still, **do not forget** to mount everthing collected inside `services.urls` to 
 #### @serve_unprotected
 Same as @serve but without csrf protection.
 
+#### @methods(m1, m2, ...)
+Same as @methods for a service function.
+
 #### @url(path)
-Same as @url for a service function but with different default paths.
+Same as @url for a service function.
 
 
 ## Database Backends

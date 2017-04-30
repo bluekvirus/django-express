@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     # Need to use include() here as urls.py is consulted before apps ready.
-    # There is no service auto-discovery before that point, thus no services.urls. 
+    # There is no service auto-discovery before that point, thus no services.urls.
     url(r'^api/v1/', include(services.urls, namespace='express')),
     url(r'^testb/api/v1/', include(services.url('testb', noprefix=True), namespace='express')),
 ]

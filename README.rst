@@ -254,12 +254,12 @@ Turn your ``fn(req, res, *args, **kwargs)`` function into a Restful
 service routine. Automatically detected if present in ``services.py`` in
 any **installed** app.
 
--  Default path with ``services.urls``: ``/<app>/services/<fn>``
+-  Default path with ``services.urls``: ``/<app>/<fn>``
 -  Default path with ``services.url(app, noprefix=True)``: ``/<fn>``
 
 You can change the mounting path by using the ``@url()`` decorator. You
 can also use ``django.urls.reverse()`` to get the mount point by name
-``<namespace>:<app>.<fn>``.
+``<namespace>:<app>.services.<fn>``.
 
 Still, **do not forget** to mount everthing collected inside
 ``services.urls`` to a root url in the django ``urls.py``. See the
@@ -269,14 +269,16 @@ Still, **do not forget** to mount everthing collected inside
 ^^^^^^^^^^^^^^^^^^^^^
 
 Allowed HTTP request methods to the service. You can also use ``@safe``
-to allow only ``GET`` and ``HEAD`` requests.
+to allow only ``GET`` and ``HEAD`` requests. You can use different
+``@methods()`` on each service function with the same ``@url()`` path to
+reuse the same url.
 
 @url(path)
 ^^^^^^^^^^
 
-Override basic service auto-path (``/<app>/services/<fn>``). No need to
-use ``r'..path..'`` here, what you put in ``path`` will be treated as
-raw string automatically. Feel free to put regex group captures. **Just
+Override basic service auto-path (``/<app>/<fn>``). No need to use
+``r'..path..'`` here, what you put in ``path`` will be treated as raw
+string automatically. Feel free to put regex group captures. **Just
 don't mix named and annonymous capture groups in the url path, they
 won't work together in django.**
 
@@ -306,11 +308,14 @@ For a Model
 @serve
 ^^^^^^
 
-Give a Model default RESTful apis to its CRUD operations. Default path
-``/<app>/models/<Model>``
+Give a Model default RESTful apis to its CRUD operations.
 
--  Default path with ``services.urls``: ``/<app>/models/<Model>``
+-  Default path with ``services.urls``: ``/<app>/<Model>``
 -  Default path wiht ``services.url(app, noprefix=True)``: ``/<Model>``
+
+You can change the mounting path by using the ``@url()`` decorator. You
+can also use ``django.urls.reverse()`` to get the mount point by name
+``<namespace>:<app>.models.<fn>``.
 
 -  POST -- create -- {"payload": {...data...}}
 -  GET -- read -- ?pk= for single record, omit for all
@@ -346,10 +351,15 @@ Still, **do not forget** to mount everthing collected inside
 
 Same as @serve but without csrf protection.
 
+@methods(m1, m2, ...)
+^^^^^^^^^^^^^^^^^^^^^
+
+Same as @methods for a service function.
+
 @url(path)
 ^^^^^^^^^^
 
-Same as @url for a service function but with different default paths.
+Same as @url for a service function.
 
 Database Backends
 -----------------

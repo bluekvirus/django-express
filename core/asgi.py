@@ -12,8 +12,8 @@ daphne core.asgi:channel_layer
 
 Note
 ----
-This is for deployment only, using `./manage.py runserver` in dev doesn't need this unless you want to 
-access the channel_layer directly which is needed when manually creating the Channel/Group object for 
+This is for deployment only, using `./manage.py runserver` in dev doesn't need this unless you want to
+access the channel_layer directly which is needed when manually creating the Channel/Group object for
 .send(content_dict) in other part of Django app code (non-consumer).
 """
 import os

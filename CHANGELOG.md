@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-0.3.2+ (2017-03-24*)
+0.3.3+ (2017-04-30*)
 -------------------
 1. Changed default services mount point to `<app_name>/<fn_name>`;
 2. Added Model decorator @serve, @serve_unprotected for default CRUD->api mappings;
@@ -11,10 +11,11 @@ Change Log
 6. Added dummy mongodb (pymongo) backend for using django.db.connections['mongo'] directly;
 7. Added ?db='DB' in @serve(-ed apis) for multiple db selection support;
 8. Changed relative @url services mount point to `<app_name>/<url>`; 
+9. Refined @methods to remove the need to use generic views in Django;
+10. @methods now also supports using with @serve*-ed Models;
 
 working on ...
 
-- @methods to replace the need to use generic views in Django;
 - @cors and CORS middleware (mode: all/regex, tagged-only);
 - @Model.signals.event for faster signal hook-up with fn;
 - @permissions (uri/model, object) and ModelObjectBackend auth backend, (link m-m [ObjectPermission, object.pk] to user/group as object_permissions);
