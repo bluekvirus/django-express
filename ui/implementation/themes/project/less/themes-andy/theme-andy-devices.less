@@ -1,0 +1,145 @@
+@ct-holder-width: 340px;
+@ct-holder-height: 580px;
+@named-grp-max-height: 220px;
+.context-models, .regional-models-fields, .regional-models-relation{
+	height: 100%;
+	// @panel-gutter-width: @grid-gutter-width;
+	@panel-gutter-width: 11px;
+	@h-width: @ct-holder-width * 2 + @panel-gutter-width + 5;
+	ul.nav-tabs{
+		margin: 1em auto;
+		width: @h-width;
+		// width: 66%;
+	    // [tabid="grps"]{
+	    // 	width: 130px;
+	    // }
+	}
+	.flex-ct{
+		display: flex;
+		justify-content: flex-start;
+		height: 100%;
+		&.flex-row{
+			flex-flow: row;
+		}
+		&.flex-col{
+			flex-flow: column;
+		}
+	}
+
+	.horizon-holder{
+		.clearfix;
+		height: 100%;
+		margin: 0 .3em;
+		// width: @h-width;
+		// margin-bottom: .7em;
+		&.fixed-width{
+			margin:0 auto;
+			width: 780px;
+			&.holder-lg{
+				width: 90%;
+			}
+		}
+	}
+
+	.ct-holder{
+		&.fixed-height{
+			height: @ct-holder-height;
+		}
+		&.panel-ct{
+			background-color: #fff;
+			border: 1px solid @border;
+			box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.6);
+		}
+	}
+
+}
+
+.regional-models-display {
+	svg{
+		text.relation, circle{
+			&:hover{
+				cursor: pointer;
+				stroke: #44B78B;
+			}
+		}
+	}
+	.link {
+	  fill: none;
+	  stroke: #666;
+	  // stroke-width: 1.5px;
+	}
+
+	text.relation, text.node{
+		text-anchor: "middle";
+		dominant-baseline: "central";
+	}
+	circle {
+	  // fill: none;
+	  fill: #ccc;
+	  opacity: 1;
+	  // stroke: #333;
+	  stroke-width: 1.5px;
+	 //  &:hover{
+		// stroke: #44B78B;
+	 //  }
+	}
+
+	text {
+	  font: 10px sans-serif;
+	  // pointer-events: none;
+	  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+	}
+	[svg="topo"]{
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+	}
+
+}
+.regional-models-fields, .regional-models-relation{
+	@ct-padding-v:         30px;
+	@ct-padding-h:         15px;
+	div, span{
+		user-select: text;
+	}
+	border-left: 1px solid #DEDEDE;
+	.top-bar{
+		font-weight: 800;
+		font-size: 1.5em;
+		margin-bottom: 1em;
+	}
+	.records-ct{
+		margin: auto;
+		padding: @ct-padding-v - 9px @ct-padding-h - 14px @ct-padding-v @ct-padding-h;
+		.adding{
+			input{
+			    width: 86.6%;
+			}
+		}
+	}
+	.individuals{
+		overflow-y: auto;
+		padding-right: @grid-gutter-width / 2;
+		width: 100%;
+	}
+	.individual{
+		padding: @grid-gutter-width / 2;
+		&.border{
+			border-bottom: 1px solid @border;
+		}
+		font-weight: 600;
+		&.hdr{
+			color: @text-muted;
+			span{
+				margin-right: 2em;
+			}
+		}
+		span.fine-text{
+			color: @text-muted;
+			font-size: smaller;
+		}
+	}
+}
+

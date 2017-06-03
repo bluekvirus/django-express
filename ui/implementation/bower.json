@@ -1,0 +1,57 @@
+{
+  "name": "my.project",
+  "private": true,
+  "devDependencies": {
+    "stage": "^1.10.2",
+    "bootstrap": "~3.x.x",
+    "fontawesome": "~4.x.x",
+    "open-sans-fontface": "*"
+  },
+  "open-source-libs": {
+    "velocity": "*",
+    "interact": "*",
+    "gridster": "*",
+    "MasonJS": "*",
+    "scrollreveal": "*",
+    "crossfilter": "*",
+    "victor": "*",
+    "spinkit": "*",
+    "nprogress": "*",
+    "owl.carousel": "*",
+    "colorbox": "*",
+    "switchery": "*",
+    "ace-builds": "*",
+    "highlightjs": "*",
+    "Snap.svg": "*",
+    "paper": "*",
+    "EaselJS": "*",
+    "Chart.js": "*",
+    "peity": "*",
+    "c3": "*",
+    "topojson": "*",
+    "soundmanager": "*",
+    "video.js": "*",
+    "reveal.js": "*",
+    "mockjs": "*",
+    "mocha": "*",
+    "chai": "*",
+    "lesshat": "*",
+    "bootswatch": "*",
+    "bootstrap-material-design": "*",
+    "material-design-lite": "*",
+    "material-design-icons": "*",
+    "roboto-fontface": "*",
+    "ubuntu-fontface": "*"
+  },
+  "updatedOn": "2017-06-03T04:21:31.175Z",
+  "dependencies": {
+    "bootswatch": "~3.3.*",
+    "mockjs": "~1.0.0",
+    "raphael": "~2.1.4",
+    "d3": "3.5.17",
+    "peity": "^3.2.0"
+  },
+  "resolutions": {
+    "raphael": "~2.1.4"
+  }
+}
