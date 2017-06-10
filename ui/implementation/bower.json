@@ -43,7 +43,7 @@
     "roboto-fontface": "*",
     "ubuntu-fontface": "*"
   },
-  "updatedOn": "2017-06-03T04:21:31.175Z",
+  "updatedOn": "2017-06-10T01:41:01.290Z",
   "dependencies": {
     "bootswatch": "~3.3.*",
     "mockjs": "~1.0.0",
@@ -52,6 +52,7 @@
     "peity": "^3.2.0"
   },
   "resolutions": {
-    "raphael": "~2.1.4"
+    "raphael": "~2.1.4",
+    "d3": "3.5.17"
   }
 }

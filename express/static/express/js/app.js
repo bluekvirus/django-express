@@ -1,4 +1,277 @@
-/**
+;;(function(app){
+
+	var _currentView = '';
+	app.view('Header', {
+		template: '@view/header.html',
+		coop:['context-switched'],
+		actions: {
+			goto: function($el){
+				var context = $el.data('context');
+				if( context ){
+					app.navigate(context);
+				}
+			},
+			'load-cm': function(){
+				var Cm = app.get('Cm');
+				(new Cm()).overlay({
+					class: 'overlay-cm',
+					effect: false
+				});
+			}
+		},
+		onReady: function(){
+			var that = this,
+				flag = false;
+
+			//initialize tooltip
+			this.$el.find('[data-toggle="tooltip"]').tooltip();
+
+		},
+		onContextSwitched: function(ctx){
+			_.defer(function(argument){
+				this.$el.find('.active').removeClass('active');
+				if(ctx === 'Models'){
+					this.$el.find('[data-context="Models/Models.IndvsTable"]').addClass('active')
+				}else{
+					this.$el.find('[data-context="' + ctx + '"]').addClass('active');
+				}
+			}.bind(this));
+		}
+	});
+})(Application);
+;/**
+ * Sample CONTEXT script.
+ *
+ * @author Stagejs.CLI
+ * @created Mon Aug 29 2016 12:51:43 GMT-0700 (PDT)
+ */
+;(function(app){
+    app.page('Models', {
+        template: [
+            '<div style="height: 100%; width: 100%; display: flex; flex-flow: row; justify-content: flex-start; position: relative;">',
+                '<div style="flex: 0 0 220px;" view="Models.MenuCt"></div>',
+                '<div style="flex: 0 0 3px;background-color: #ddd;"></div>',
+                '<div style="flex: 1 1 0px; display: flex; flex-flow: column; justify-content: flex-start;" class="body">',
+                    // '<div style="flex: 0 0 38px;" view="BreadCrumbs"></div>',
+                    // '<div style="flex: 0 0 1px;background-color: #ddd;"></div>',
+                    '<div style="flex: 1 1 0;" region="panel"></div>',
+                '</div>',
+            '</div>',
+        ],
+        navRegion: 'panel',
+        coop: ['show-model'],
+        actions: {
+            'remove-filter': function(){
+                //appearance
+                this.$el.find('.search-filter-placeholder').removeClass('hidden');
+                this.$el.find('.search-filter-active').addClass('hidden');
+                //metadata
+                this.onSearch('');
+            },
+        },
+        initialize: function(){
+        },
+        onNavigateTo: function(path){
+        },
+        onShowModel: function(path){
+            // console.log(path);
+            this.show('panel', 'Models.Display', {
+                data: {
+                    app: path
+                }
+            });
+            app.curtain('default', false);
+        }
+
+    });
+})(Application);
+
+;;(function(app){
+
+	app.setup({
+		//navigate region for context
+		navRegion: 'context',
+		//setup layout
+		layout: {
+			split: ['4em:Header', '1:context'],
+			bars: false
+		},
+		icings: {
+			'default': {left:'72%', top:'4em', bottom: '0%', right: 0, 'overflow-y': 'auto', 'overflow-x': 'hidden'}
+		},
+
+		//view source
+		viewSrcs: 'js', //set this to a folder path to enable view dynamic loading.
+		//---------------------------------------------------------------------------------------------
+		fullScreen: true, //this will put <body> to be full screen sized (window.innerHeight).
+		//---------------------------------------------------------------------------------------------
+		i18nTransFile: 'i18n.json', //can be {locale}.json
+		i18nLocale: '', //if you really want to force the app to certain locale other than browser preference. (Still override-able by ?locale=.. in url)
+		//---------------------------------------------------------------------------------------------
+		//baseAjaxURI: '/api/v1', //modify this to fit your own backend apis. e.g index.php?q= or '/api'
+		timeout: 5 * 60 * 1000 //general communication timeout (ms), e.g when using app.remote()
+	});
+
+	app.addInitializer(function(){
+		app.global = app.global || {};
+		if(!window.location.href.includes('#navigate')){
+			window.location.href = '#navigate/Models/Models.Display';
+			// window.location.href = '#navigate/Models/Models.Menu';
+		}
+	});
+})(Application);
+
+;/**
+ * Sample VIEW script.
+ *
+ * @author Stagejs.CLI
+ * @created Wed May 31 2017 15:45:20 GMT-0700 (PDT)
+ */
+;(function(app){
+
+	app.view('Models.Fields', {
+
+		template: '@view/models/fields.html',
+		
+		onReady: function(){
+		},
+		
+		actions: {
+		},
+
+	});
+	app.view('Models.Relation', {
+
+		template: '@view/models/fields.html',
+		
+		onReady: function(){
+			// this.$el.find('[data-toggle="tooltip"]').tooltip({
+			// 	placement: 'right'
+			// });
+			this.$el.find('[data-toggle="tooltip"]').tooltip();
+		},
+		
+		actions: {
+		},
+
+	});
+
+})(Application);
+;(function(app){
+
+	app.context('Mockups', {
+		
+		className: 'wrapper-full container-fluid',
+		template: '<div region="mockups"></div>',
+
+		data: {
+			mockups: [
+
+				//breadcrumb
+				{tpl: 'breadcrumb.html'},
+
+				//navbars
+				{tpl: 'nav-bar.html', className: 'navbar-default'},
+				{tpl: 'nav-bar.html', className: 'navbar-inverse'},
+
+				//boxes
+				{tpl: 'boxes.html', onReady: function(){
+					if(Modernizr.chrome){
+						this.$el.find('[warning="chrome"]').removeClass('hidden');
+					}
+				}},
+
+				//containers
+				{tpl: 'containers.html'},			
+
+				//buttons
+				{tpl: 'buttons.html',},
+
+				//typography
+				{tpl: 'typography.html'},
+
+				//indicators (alert, lable, badge and progress bar)
+				{tpl: 'indicators.html'},
+
+				//navigators
+				{tpl: 'navs.html'},
+
+				//tooltips/popovers & modal
+				{tpl: 'dialogs.html'},
+
+				//table
+				{tpl: 'table.html'},
+
+				//forms
+				{tpl: 'forms.html'},
+
+				//copyright of the mockup collections above
+				{tpl: 'copyright.html'}
+
+		]},
+
+		onReady: function(){
+			_.each(this.get('mockups'), function(m){
+				/////////////////////////////////////////////////////////////////////////
+				///Manually managed view life cycle..without this.show('region',...)..///
+				/////////////////////////////////////////////////////////////////////////
+				//1. create it
+				var view = app.view({
+					className: 'wrapper-full',
+					template: '@mockups/' + m.tpl,
+					onRender: function(){
+						this.$el.find('> div').addClass(m.className);
+					},
+					onReady: function(){
+						if(m.onReady) m.onReady.call(this);
+					}
+				}, true);
+				//2. render and insert it into DOM
+				this.getRegion('mockups').$el.append(view.render().el);
+				//3. connect the view life-cycle event seq: --render--[[show]]--ready 
+				view.triggerMethod('show'); 
+				//4. tell the views to close themselves upon parent view close
+				view.listenTo(this, 'close', function(){
+					view.close();
+				});
+				//(ref: /lib+-/marionette/view.js, we refined the seq and added a ready e.)
+			}, this);
+		}
+
+	});
+
+})(Application);
+;/**
+ * Sample VIEW script.
+ *
+ * @author Stagejs.CLI
+ * @created Thu Mar 02 2017 19:36:22 GMT-0800 (PST)
+ */
+;(function(app){
+
+	app.view('BreadCrumbs', {
+
+		template: '@view/bread-crumbs.html',
+		//data: 'url', {} or [],
+		coop: ['breadcrumbs-change'],
+		//[editors]: {...},
+		
+		initialize: function(){},
+		//onShow: function(){},
+		//onDataRendered: function(){},
+		onBreadcrumbsChange: function(bcs){
+			this.set({bcs: bcs});
+		},
+		actions: {
+		//	submit: function(){...},
+		//	dosomething: function(){...},
+		//	...
+		},
+
+	});
+
+})(Application);
+;/**
  *
  * @author Andy Fan
  * @created Tue May 14 2017 17:33:43 GMT-0800 (PST)
@@ -512,3 +785,107 @@
         },
     });
 })(Application);
+
+;/**
+ * Sample VIEW script.
+ *
+ * @author Stagejs.CLI
+ * @created Wed Mar 01 2017 16:29:28 GMT-0800 (PST)
+ */
+;(function(app){
+
+	app.view('Models.MenuCt', {
+
+		template: '<div region="apps"></div>',
+		// template: '@view/models/menu.html',
+		//data: 'url', {} or [],
+		//coop: ['e', 'e'],
+		//[editors]: {...},
+		
+		initialize: function(){
+		},
+		onReady: function(){
+			var that = this;
+			app.remote({
+			    url: '/express/apps/',
+			}).then(function(data){
+				that.show('apps', 'Models.Menu', 
+					{
+						data: {
+							apps: data.payload
+						}
+					}
+				);
+			});
+		},
+		//onDataRendered: function(){},
+		
+		actions: {
+		//	dosomething: function(){...},
+		//	...
+		},
+		coop:['context-switched', 'navigate-to'],
+		onItemActivated: function($item) {
+		    app.navigate('Models/' + $item.data('context'));
+		    app.coop('breadcrumbs-change', [{href: 'Models', name: app.global.bcsMap['Models']}, {href: $item.data('context'), name: app.global.bcsMap[$item.data('context')]}]);
+		    
+		},
+		onContextSwitched: function($item) {
+			if(window.location.hash.startsWith("#navigate/Models")){
+				var sub = window.location.hash.slice("#navigate/Models/".length);
+				this.$el.find('[data-context="' + sub + '"]').addClass('actived');
+			    app.coop('breadcrumbs-change', [{href: 'Models', name: app.global.bcsMap['Models']}, {href: sub, name: app.global.bcsMap[sub]}]);
+
+			}
+		},
+	});
+	app.view('Models.Menu', {
+
+		template: '@view/models/menu.html',
+		
+		actions: {
+			goto: function(self){
+				// console.log(self.data('link'));
+				app.coop('show-model', self.data('link'))
+			},
+		},
+		initialize: function(){
+		},
+		onReady: function(){
+
+		},
+	});
+})(Application);
+;/**
+ * Sample VIEW script.
+ *
+ * @author Stagejs.CLI
+ * @created Tue Mar 07 2017 17:40:36 GMT-0800 (PST)
+ */
+;(function(app){
+
+	app.view('Status', {
+
+		template: '@view/status.html',
+		//data: 'url', {} or [],
+		//coop: ['e', 'e'],
+		//[editors]: {...},
+		
+		initialize: function(){},
+		//onShow: function(){},
+		//onDataRendered: function(){},
+		
+		actions: {
+		//	submit: function(){...},
+		//	dosomething: function(){...},
+		//	...
+		},
+
+	});
+
+})(Application);
+;
+        //do not change this script tag's id="" attr and position.
+        Application.run(/*deviceready - Cordova*/);
+    
+;
