@@ -1,0 +1,187 @@
+@background: #F0F0F0;
+@border: #DEDEDE;
+
+body{
+	 background-color: @background;
+}
+
+//context region
+.region-context{
+	// overflow-y: auto;
+	height: 100%;
+}
+
+//header view
+[view="Header"]{
+	background-color: white;
+	border: 1px @border solid;
+	> div{
+		#head-title{
+			list-style-type: none;
+			padding-left: 0 !important;
+			margin-right: 20px;
+			margin-bottom: 0;
+			cursor: default;
+			li{
+				float: left;
+				#title-icon{
+					line-height: 4em;
+					margin-left: .8em;
+					margin-right: .2em;
+					> i{
+						font-size: 1.9em;
+					}
+				}
+			}
+			li#title-texts{
+				float: left;
+				padding-top: 1.2em;
+				//padding-bottom: 0.8em;
+				#title{
+					line-height: 1.4em;
+					> span{
+						font-weight: 700;
+						font-size: 1.6em;
+					}
+				}
+				#version{
+					line-height: 0.7em;
+					padding: 0.1em;
+					> span{
+						font-size: 0.7em;
+						font-weight: 600;
+					}
+				}
+			}
+		}
+	}
+	//inline blocks
+	.inline-block{
+		display: inline-block;
+	}
+	//inlines
+	.inline{
+		display: inline;
+	}
+	//blocks
+	.block{
+		display: block;
+	}
+}
+
+
+.popover{
+	border: none;
+	background-color: @border;
+	> .arrow:after{
+			//border-bottom-color: @border !important;
+		}
+	.popover-content{
+		color: #000;
+		background-color: #fff;
+	}
+	//background-color: @border;
+	//border: none ;
+	//
+}
+
+.overlay-overflow-y{
+	position: relative;
+	z-index: 9999;
+	background-color: rgba(0, 0, 0, 0.6);
+	overflow-y: auto;
+}
+.overlay-overflow-x{
+	overflow-x: auto;
+}
+
+//hide number type input spin buttons
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.inline-block{
+	display: inline-block;
+}
+
+.modal-footer{
+	.status-line-error{
+		color: #f04124;
+	}
+}
+
+.context-models{
+	.region-panel{
+		// overflow-y: auto;
+		height: 100%;
+	}
+	position: relative;
+	[data-view-name="System.Menu"], [data-view-name="Models.MenuCt"]{
+		.search-input{
+			flex: 0 0 4em;
+			padding: 0.8em;
+			border-bottom: 1px solid @border;
+			.form-group{
+				margin-bottom: 0;
+				.input-group-addon{
+					position: relative;
+					button{
+						position: absolute;
+						top: 0;
+						bottom: 0;
+						right:0;
+						left: 0;
+						opacity: 0;
+						width: 100%;
+					}
+				}
+			}
+		}
+		.menuct{
+			overflow-y: auto;
+			// padding: 0 0.7em;
+			flex: 1;
+			max-width: 300px;
+			.menu-divider{
+				// margin-top: .9em;
+				// margin-bottom: .9em;
+			    width: 100%;
+			    border-top: 1px solid #dedede;
+			}
+			.menu-group{
+                background-color: #0000;
+				.actived{
+	                background-color: #BFBFBF;
+				}
+				.menu-head{
+	                padding: 8px 1em;
+					&:hover{
+						cursor: pointer;
+	                    text-shadow: 0 1px 8px #333;
+					}
+					overflow-x: hidden;
+					word-wrap: break-word;
+					position: relative;
+					line-height: 1.4em;
+					i{
+						font-size: 1.4em;
+					}
+					span, a{
+						font-size: 0.8em;
+						font-weight: 600;
+						padding-left: 1em;
+					}
+				}
+			}
+
+		}
+	}
+}

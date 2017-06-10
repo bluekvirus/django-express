@@ -16,7 +16,9 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from express import services
-
+print('------------------urls-----------')
+print(services.urls)
+print('--------end----------urls-----------')
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
@@ -24,4 +26,5 @@ urlpatterns = [
     # There is no service auto-discovery before that point, thus no services.urls.
     url(r'^api/v1/', include(services.urls, namespace='express')),
     url(r'^testb/api/v1/', include(services.url('testb', noprefix=True), namespace='express')),
+    url(r'^express/', include('express.site.urls')),
 ]
