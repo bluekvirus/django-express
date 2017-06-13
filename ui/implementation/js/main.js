@@ -9,7 +9,7 @@
 			bars: false
 		},
 		icings: {
-			'default': {left:'72%', top:'4em', bottom: '0%', right: 0, 'overflow-y': 'auto', 'overflow-x': 'hidden'}
+			'default': {left:'70%', top:'4em', bottom: '0%', right: 0, 'overflow-y': 'auto', 'overflow-x': 'hidden'}
 		},
 
 		//view source

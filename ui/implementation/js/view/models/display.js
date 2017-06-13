@@ -13,7 +13,7 @@
                 // console.log(this.cur);
                 var that = this;
                 app.remote({
-                    url: '/express/models',
+                    url: '/express/models/',
                     params: {
                         app: (that.cur || '')
                     }

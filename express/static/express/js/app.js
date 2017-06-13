@@ -49,7 +49,7 @@
     app.page('Models', {
         template: [
             '<div style="height: 100%; width: 100%; display: flex; flex-flow: row; justify-content: flex-start; position: relative;">',
-                '<div style="flex: 0 0 220px;" view="Models.MenuCt"></div>',
+                '<div style="flex: 0 0 180px;" view="Models.MenuCt"></div>',
                 '<div style="flex: 0 0 3px;background-color: #ddd;"></div>',
                 '<div style="flex: 1 1 0px; display: flex; flex-flow: column; justify-content: flex-start;" class="body">',
                     // '<div style="flex: 0 0 38px;" view="BreadCrumbs"></div>',
@@ -97,7 +97,7 @@
 			bars: false
 		},
 		icings: {
-			'default': {left:'72%', top:'4em', bottom: '0%', right: 0, 'overflow-y': 'auto', 'overflow-x': 'hidden'}
+			'default': {left:'70%', top:'4em', bottom: '0%', right: 0, 'overflow-y': 'auto', 'overflow-x': 'hidden'}
 		},
 
 		//view source
@@ -286,7 +286,7 @@
                 // console.log(this.cur);
                 var that = this;
                 app.remote({
-                    url: '/express/models',
+                    url: '/express/models/',
                     params: {
                         app: (that.cur || '')
                     }
