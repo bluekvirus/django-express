@@ -16,7 +16,9 @@ Change Log
 
 working on ...
 
+- transitive relational fields access support in @Serve(Model); (reflection, 1 lvl only)
 - @cors and CORS middleware (mode: all/regex, tagged-only);
+- objects as direct @response; (experimental, since fn/models are services...)
 - @Model.signals.event for faster signal hook-up with fn;
 - @permissions (uri/model, object) and ModelObjectBackend auth backend, (link m-m [ObjectPermission, object.pk] to user/group as object_permissions);
 - refine @serve* (+validation);
