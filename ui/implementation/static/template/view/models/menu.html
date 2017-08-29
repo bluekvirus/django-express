@@ -1,0 +1,13 @@
+<div class="menuct">
+{{#each apps}}
+    <div class="menu-group">
+        <!-- <div class="menu-head" activate="select:actived" data-context="Models.Display" action="goto" data-link="{{mkey}}"> -->
+        <div class="menu-head" activate="select:actived" action="goto" data-link="{{mkey}}">
+        <!-- <div class="menu-head"> -->
+            <!-- <i class="pull-left icon-interface"></i> -->
+            <span class="panel-title">{{mkey}}</span>
+            <!-- <a class="panel-title" href="#navigate/Models/Models.Display/{{mkey}}">{{mkey}}</a> -->
+        </div>
+    </div>
+{{/each}}
+</div>

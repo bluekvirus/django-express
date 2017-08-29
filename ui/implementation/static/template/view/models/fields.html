@@ -1,0 +1,36 @@
+<div class="records-ct">
+    <div class="top-bar">{{mkey}}</div>
+    <div class="individual hdr border">
+        <span>{{hdr.left}}</span>
+        <span class="pull-right text-right">{{hdr.right}}</span>
+    </div>
+    <div region="individual-records" class="individuals">
+        {{#each items}}
+            {{#if third.name}}
+            <div class="individual field">
+                    <span data-toggle='tooltip' data-placement='right' data-original-title='{{first.full_name}}'>{{first.name}}</span>
+                    <span data-toggle='tooltip' data-original-title='{{second.full_name}}' class="pull-right text-right">{{second.name}}</span>
+            </div>
+            <div class="individual field border">
+                    <span class="invisible">{{first.name}}</span>
+                    <span class="pull-right text-right fine-text">( {{third.name}} )</span>
+            </div>
+            {{else}}
+            <div class="individual field border">
+                    <span data-toggle='tooltip' data-placement='right'  data-original-title='{{first.full_name}}'>{{first.name}}</span>
+                    <span data-toggle='tooltip' data-placement='top' data-original-title='{{second.full_name}}' class="pull-right text-right">{{second.name}}</span>
+            </div>
+            {{/if}}
+        {{/each}}
+    </div>
+</div>
+<div class="custom-texturegrey" style="
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    opacity: .8;
+    ">
+</div>
