@@ -11,13 +11,15 @@ class ExpressConfig(AppConfig):
 	def ready(self):
         # auto load apis indicated by services.py, models.py from each (installed) app
 		self.module.autodiscover('services', 'models')
-		if django.get_version()[0] == '2': #for version 2 of django
+		if django.get_version().startswith('2'): #for version 2 of django
 			for url in self.module.services._generated:
 				logger.info('[express: uri] ' + str(url.pattern.regex.pattern) + ' -- (name: ' + str(url.name) + ')')
 			for root in self.module.services._global_urls:
 				logger.info('[django: base] ' + str(root.pattern.regex.pattern))
-		else: #for versions 1.10, 1.11
+		elif django.get_version().startswith('1'): #for versions 1.10, 1.11
 			for url in self.module.services._generated:
 				logger.info('[express: uri] ' + str(url.regex.pattern) + ' -- (name: ' + str(url.name) + ')')
 			for root in self.module.services._global_urls:
 				logger.info('[django: base] ' + str(root.regex.pattern))
+        else:
+			print("Error, incompatible django version detected.")
