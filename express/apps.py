@@ -11,6 +11,6 @@ class ExpressConfig(AppConfig):
         # auto load apis indicated by services.py, models.py from each (installed) app
         self.module.autodiscover('services', 'models')
         for url in self.module.services._generated:
-            logger.info('[express: uri] ' + str(url.regex.pattern) + ' -- (name: ' + str(url.name) + ')')
+            logger.info('[express: uri] ' + str(url.pattern.regex.pattern) + ' -- (name: ' + str(url.name) + ')')
         for root in self.module.services._global_urls:
-            logger.info('[django: base] ' + str(root.regex.pattern))
+            logger.info('[django: base] ' + str(root.pattern.regex.pattern))
