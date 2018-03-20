@@ -1,4 +1,4 @@
-Django >= 1.8
+Django >= 1.10
 channels >= 1.1
 asgi_redis >= 1.2
 pymongo >= 3.4
