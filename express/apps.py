@@ -22,4 +22,4 @@ class ExpressConfig(AppConfig):
 			for root in self.module.services._global_urls:
 				logger.info('[django: base] ' + str(root.regex.pattern))
         else:
-			print("Error, incompatible django version detected.")
+			print("Error, incompatible Django version detected!")
