@@ -425,5 +425,5 @@ Copyright 2017 Tim Lauv. Under the
    :target: https://pypi.python.org/pypi/django-express
 .. |PyPI-pyv| image:: https://img.shields.io/pypi/pyversions/django-express.svg
    :target: https://pypi.python.org/pypi/django-express
-.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.8%2C%201.9%2C%201.10-44B78B.svg
+.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.10%2C%201.11%2C%202.0-44B78B.svg
    :target: https://www.djangoproject.com/
