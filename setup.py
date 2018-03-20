@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3.3.dev1',
+    version='0.4.0',
 
     description='Easy Restful APIs with the Django web framework.',
     long_description=long_description,
@@ -44,7 +44,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Extra Meta
         'Environment :: Web Environment',
@@ -94,7 +94,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'Django >= 1.8',
+        'Django >= 1.10',
     ],
 
     # List additional groups of dependencies here (e.g. development
