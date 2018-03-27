@@ -75,6 +75,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.routings.application'
 
 
 # Database
@@ -100,11 +101,9 @@ DATABASES = {
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'asgiref.inmemory.ChannelLayer',
-        'ROUTING': 'core.routings.channel_routing',
     },
     'redis': {
         'BACKEND': 'asgi_redis.RedisChannelLayer',
-        'ROUTING': 'core.routings.channel_routing',
         'CONFIG': {
             # 'hosts': [('localhost', 6379)]
         }

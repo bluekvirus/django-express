@@ -94,7 +94,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'Django >= 1.10',
+        'Django >= 1.11',
     ],
 
     # List additional groups of dependencies here (e.g. development

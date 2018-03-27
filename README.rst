@@ -8,7 +8,7 @@ Easy Restful APIs with the Django web framework.
 Install
 -------
 
-Download through ``pip`` (virtualenv -p python3.3+ .venv)
+Download through ``pip`` (virtualenv -p python3 .venv)
 
 ::
 
@@ -259,7 +259,9 @@ any **installed** app.
 
 You can change the mounting path by using the ``@url()`` decorator. You
 can also use ``django.urls.reverse()`` to get the mount point by name
-``<namespace>:<app>.services.<fn>``.
+``<namespace>:<app>.services.<fn>`` **if you mount the
+``services.url(s)`` with namespaced ``include()`` calls in
+``urls.py``**.
 
 Still, **do not forget** to mount everthing collected inside
 ``services.urls`` to a root url in the django ``urls.py``. See the
@@ -425,5 +427,5 @@ Copyright 2017 Tim Lauv. Under the
    :target: https://pypi.python.org/pypi/django-express
 .. |PyPI-pyv| image:: https://img.shields.io/pypi/pyversions/django-express.svg
    :target: https://pypi.python.org/pypi/django-express
-.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.10%2C%201.11%2C%202.0-44B78B.svg
+.. |PypI-djangov| image:: https://img.shields.io/badge/Django-1.11%2C%202.0-44B78B.svg
    :target: https://www.djangoproject.com/

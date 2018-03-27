@@ -1,7 +1,7 @@
 # django-express 
 [![PyPI-v](https://img.shields.io/pypi/v/django-express.svg)](https://pypi.python.org/pypi/django-express) 
 [![PyPI-pyv](https://img.shields.io/pypi/pyversions/django-express.svg)](https://pypi.python.org/pypi/django-express) 
-[![PypI-djangov](https://img.shields.io/badge/Django-1.8%2C%201.9%2C%201.10-44B78B.svg)](https://www.djangoproject.com/)
+[![PypI-djangov](https://img.shields.io/badge/Django-1.11%2C%202.0-44B78B.svg)](https://www.djangoproject.com/)
 
 Easy Restful APIs with the Django web framework.
 
@@ -182,7 +182,7 @@ Turn your `fn(req, res, *args, **kwargs)` function into a Restful service routin
 * Default path with `services.urls`: `/<app>/<fn>`
 * Default path with `services.url(app, noprefix=True)`: `/<fn>`
 
-You can change the mounting path by using the `@url()` decorator. You can also use `django.urls.reverse()` to get the mount point by name `<namespace>:<app>.services.<fn>`.
+You can change the mounting path by using the `@url()` decorator. You can also use `django.urls.reverse()` to get the mount point by name `<namespace>:<app>.services.<fn>` **if you mount the `services.url(s)` with namespaced `include()` calls in `urls.py`**.
 
 Still, **do not forget** to mount everthing collected inside `services.urls` to a root url in the django `urls.py`. See the **Setup** section above.
 

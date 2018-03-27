@@ -113,7 +113,7 @@ class ExpressRequest(object):
         pass through headers dict gets (e.g req['Header-Foo'] = 'Bar')
 
         '''
-        return self._req.META[key]
+        return self._req.META.get(key, '') # use '' empty string as default http header value to prevent None -> null in JSON.
 
     def header(self, key):
         return self[key]
